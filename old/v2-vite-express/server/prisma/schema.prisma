@@ -1,0 +1,32 @@
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+// SQLite não tem tipo enum nativo no Prisma; "role" e "provider" são
+// strings restritas a valores fixos na camada da aplicação (ver
+// server/src/types.ts) em vez de um enum do schema.
+model User {
+  id           String   @id @default(cuid())
+  name         String
+  email        String   @unique
+  passwordHash String?
+  role         String   @default("OPERATOR")
+  provider     String   @default("LOCAL")
+  zohoUserId   String?  @unique
+  active       Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+// Armazenamento genérico chave/valor para tokens de integração e
+// configurações administráveis (nome da empresa, logo, token da Vuupt etc).
+model Setting {
+  key       String   @id
+  value     String
+  updatedAt DateTime @updatedAt
+}

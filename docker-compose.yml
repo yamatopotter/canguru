@@ -1,0 +1,28 @@
+services:
+  app:
+    # Usa a imagem publicada no Docker Hub. Pra buildar localmente em vez de
+    # baixar, comente a linha "image" acima e descomente a linha "build"
+    # abaixo (ou rode "docker build -t matheuspbarreto/canguru:latest ."
+    # antes de "docker compose up" — o compose usa a imagem já existente
+    # localmente com esse nome em vez de baixar).
+    image: matheuspbarreto/canguru:latest
+    # build: .
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      # Banco SQLite dentro do volume "vuupt-data" (fora da pasta prisma/,
+      # que na imagem só tem schema.prisma + migrations).
+      DATABASE_URL: file:/app/data/dev.db
+      APP_BASE_URL: ${APP_BASE_URL:-http://localhost:3000}
+      JWT_SECRET: "${JWT_SECRET:?defina JWT_SECRET no .env, ex: openssl rand -hex 32}"
+      COOKIE_SECURE: ${COOKIE_SECURE:-false}
+    volumes:
+      - vuupt-data:/app/data
+      - vuupt-uploads:/app/uploads
+      - vuupt-backups:/app/backups
+
+volumes:
+  vuupt-data:
+  vuupt-uploads:
+  vuupt-backups:

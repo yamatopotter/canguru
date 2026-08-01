@@ -1,0 +1,477 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Canguru — Gerador de Impressos de Endereços</title>
+<meta name="description" content="Sistema interno pra selecionar rotas de entrega da Vuupt e gerar/imprimir etiquetas de endereço em impressora térmica 72mm, uma por pacote, prontas pro motoboy." />
+<link rel="icon" href="./favicon.svg" type="image/svg+xml" />
+<style>
+  :root {
+    color-scheme: light;
+    --font-sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+
+    /* Paleta "Canguru" — mesmos tokens de src/app/globals.css */
+    --background: #fdf6ec;
+    --foreground: #2b1b12;
+    --card: #fffdf9;
+    --card-foreground: #2b1b12;
+    --primary: #c1440e;
+    --primary-foreground: #fdf6ec;
+    --secondary: #f1e6d3;
+    --secondary-foreground: #2b1b12;
+    --muted: #f1e6d3;
+    --muted-foreground: #6b5a47;
+    --accent: #fdebd3;
+    --accent-foreground: #7a3b0f;
+    --success: #16a34a;
+    --border: #e3d5bc;
+    --radius: 0.625rem;
+  }
+
+  html.dark {
+    color-scheme: dark;
+    --background: #201510;
+    --foreground: #f5e9d8;
+    --card: #2b1d15;
+    --card-foreground: #f5e9d8;
+    --primary: #e2703a;
+    --primary-foreground: #201510;
+    --secondary: #3a281c;
+    --secondary-foreground: #f5e9d8;
+    --muted: #3a281c;
+    --muted-foreground: #c4a98a;
+    --accent: #4a3320;
+    --accent-foreground: #f0c88b;
+    --success: #4ade80;
+    --border: rgba(255, 255, 255, 0.1);
+  }
+
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    margin: 0;
+    background: var(--background);
+    color: var(--foreground);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+    transition: background-color .15s, color .15s;
+  }
+  a { color: inherit; }
+  img { max-width: 100%; }
+
+  .wrap { max-width: 1080px; margin: 0 auto; padding: 0 24px; }
+
+  /* ---- header ---- */
+  header.site {
+    position: sticky; top: 0; z-index: 20;
+    display: flex; align-items: center; gap: 16px;
+    background: var(--background); border-bottom: 1px solid var(--border);
+    padding: 14px 24px;
+  }
+  header.site .brand { display: flex; align-items: center; gap: 8px; font-weight: 700; font-size: 15px; white-space: nowrap; }
+  header.site .brand img { width: 26px; height: 26px; }
+  header.site nav { display: none; gap: 4px; margin-left: 16px; }
+  header.site nav a { padding: 8px 12px; border-radius: 8px; font-size: 13.5px; font-weight: 600; color: var(--muted-foreground); text-decoration: none; }
+  header.site nav a:hover { background: var(--muted); color: var(--foreground); }
+  header.site .spacer { flex: 1; }
+  header.site .actions { display: flex; align-items: center; gap: 8px; }
+  @media (min-width: 760px) { header.site nav { display: flex; } }
+
+  .btn {
+    display: inline-flex; align-items: center; gap: 7px;
+    border-radius: 8px; padding: 9px 16px; font-size: 13.5px; font-weight: 600;
+    border: 1px solid transparent; cursor: pointer; text-decoration: none; white-space: nowrap;
+    transition: background-color .12s, border-color .12s;
+  }
+  .btn-primary { background: var(--primary); color: var(--primary-foreground); }
+  .btn-primary:hover { filter: brightness(1.06); }
+  .btn-outline { background: transparent; border-color: var(--border); color: var(--foreground); }
+  .btn-outline:hover { background: var(--muted); }
+  .btn-icon {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 36px; height: 36px; border-radius: 8px; border: 1px solid var(--border);
+    background: transparent; color: var(--foreground); cursor: pointer;
+  }
+  .btn-icon:hover { background: var(--muted); }
+
+  /* ---- hero ---- */
+  .hero { padding: 72px 0 56px; text-align: center; }
+  .hero .mascot { width: 96px; height: 96px; margin: 0 auto 20px; }
+  .hero .kicker {
+    display: inline-flex; align-items: center; gap: 8px; font-size: 12.5px; font-weight: 700;
+    text-transform: uppercase; letter-spacing: .06em; color: var(--accent-foreground);
+    background: var(--accent); border-radius: 999px; padding: 5px 14px; margin-bottom: 18px;
+  }
+  .hero h1 {
+    font-size: clamp(30px, 5vw, 46px); line-height: 1.12; margin: 0 0 16px; font-weight: 800;
+    letter-spacing: -0.01em;
+  }
+  .hero h1 span { color: var(--primary); }
+  .hero p.lede {
+    max-width: 620px; margin: 0 auto 28px; font-size: 17px; line-height: 1.6; color: var(--muted-foreground);
+  }
+  .hero .ctas { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; margin-bottom: 14px; }
+  .hero .fineprint { font-size: 12.5px; color: var(--muted-foreground); }
+
+  .badges { display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; margin-top: 32px; }
+  .badge {
+    font-size: 12px; font-weight: 600; color: var(--muted-foreground);
+    border: 1px solid var(--border); border-radius: 999px; padding: 5px 12px;
+  }
+
+  /* ---- mockup (screenshot fiel, dados fictícios) ---- */
+  .mockup-frame {
+    margin: 44px 0 8px; border-radius: 16px; border: 1px solid var(--border);
+    background: var(--card); overflow: hidden; box-shadow: 0 24px 60px -30px rgba(0,0,0,.35);
+  }
+  .mockup-chrome {
+    display: flex; align-items: center; gap: 6px; padding: 10px 14px; border-bottom: 1px solid var(--border);
+  }
+  .mockup-chrome span { width: 10px; height: 10px; border-radius: 50%; background: var(--border); }
+  .mockup-app-header {
+    display: flex; align-items: center; gap: 12px; padding: 10px 16px; border-bottom: 1px solid var(--border); background: var(--background);
+    font-size: 12px;
+  }
+  .mockup-app-header .brand { display: flex; align-items: center; gap: 6px; font-weight: 700; }
+  .mockup-app-header .brand img { width: 18px; height: 18px; }
+  .mockup-nav { display: flex; gap: 4px; margin-left: 10px; }
+  .mockup-nav span { padding: 5px 10px; border-radius: 6px; font-weight: 600; color: var(--muted-foreground); }
+  .mockup-nav span.active { background: var(--secondary); color: var(--foreground); }
+  .mockup-app-header .right { margin-left: auto; color: var(--muted-foreground); }
+
+  .mockup-body { background: var(--background); padding: 20px; }
+  .mockup-toolbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-wrap: wrap; gap: 10px; }
+  .mockup-toolbar .sel { font-size: 12px; color: var(--muted-foreground); }
+  .mockup-print-btn {
+    background: var(--primary); color: var(--primary-foreground); border-radius: 8px;
+    padding: 8px 14px; font-size: 12.5px; font-weight: 700;
+  }
+
+  .card-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 14px; }
+  .label-card {
+    background: var(--card); border: 1px solid var(--border); border-radius: 8px; padding: 12px;
+    font-size: 11px; position: relative;
+  }
+  .label-card .top { display: flex; justify-content: space-between; align-items: flex-start; gap: 6px; padding-right: 18px; }
+  .label-card .pedido { color: var(--primary); font-weight: 700; font-size: 10.5px; }
+  .label-card .logo { background: #111; color: #fff; font-size: 8px; font-weight: 800; padding: 2px 6px; border-radius: 3px; }
+  .label-card .name { font-weight: 700; font-size: 13px; margin: 6px 0 8px; line-height: 1.25; }
+  .label-card .opt { display: flex; align-items: center; gap: 6px; margin-bottom: 5px; color: var(--foreground); }
+  .label-card .radio { width: 11px; height: 11px; border-radius: 50%; border: 1.5px solid var(--foreground); flex: none; position: relative; }
+  .label-card .radio.on::after { content: ""; position: absolute; inset: 2px; border-radius: 50%; background: var(--foreground); }
+  .label-card .opt.selected { background: var(--muted); margin: 0 -6px 5px; padding: 3px 6px; border-radius: 5px; }
+  .label-card .phone { display: block; font-weight: 700; margin: 6px 0 3px; }
+  .label-card .addr { color: var(--muted-foreground); line-height: 1.4; }
+  .label-card .check {
+    position: absolute; top: 8px; right: 8px; width: 14px; height: 14px; border-radius: 4px;
+    background: var(--primary); color: var(--primary-foreground); font-size: 9px;
+    display: flex; align-items: center; justify-content: center; font-weight: 700;
+  }
+
+  /* ---- sections ---- */
+  section { padding: 64px 0; }
+  section.alt { background: var(--card); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); }
+  .section-head { text-align: center; max-width: 640px; margin: 0 auto 40px; }
+  .section-head .eyebrow { font-size: 12.5px; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; color: var(--primary); margin-bottom: 10px; }
+  .section-head h2 { font-size: clamp(24px, 3.4vw, 32px); margin: 0 0 10px; font-weight: 800; letter-spacing: -0.01em; }
+  .section-head p { color: var(--muted-foreground); font-size: 15.5px; line-height: 1.6; margin: 0; }
+
+  .steps { list-style: none; margin: 0; padding: 0; display: grid; gap: 14px; counter-reset: step; }
+  .steps li {
+    display: grid; grid-template-columns: 40px 1fr; gap: 16px; align-items: start;
+    background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 18px 20px;
+  }
+  .steps li .num {
+    width: 40px; height: 40px; border-radius: 10px; background: var(--accent); color: var(--accent-foreground);
+    display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 15px;
+  }
+  .steps li h3 { margin: 0 0 4px; font-size: 15.5px; }
+  .steps li p { margin: 0; color: var(--muted-foreground); font-size: 14px; line-height: 1.55; }
+
+  .feature-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px; }
+  .feature {
+    background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 20px;
+  }
+  .feature .icon {
+    width: 36px; height: 36px; border-radius: 9px; background: var(--accent); color: var(--accent-foreground);
+    display: flex; align-items: center; justify-content: center; margin-bottom: 12px; font-size: 17px;
+  }
+  .feature h3 { margin: 0 0 6px; font-size: 15px; }
+  .feature p { margin: 0; font-size: 13.5px; color: var(--muted-foreground); line-height: 1.55; }
+
+  .stack-row { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin-top: 28px; }
+  .stack-row span {
+    font-size: 12.5px; font-weight: 600; padding: 6px 14px; border-radius: 999px;
+    border: 1px solid var(--border); background: var(--card); color: var(--muted-foreground);
+  }
+
+  .cta-final { text-align: center; }
+  .cta-final .box {
+    background: var(--card); border: 1px solid var(--border); border-radius: 16px;
+    padding: 48px 32px; max-width: 640px; margin: 0 auto;
+  }
+  .cta-final h2 { margin: 0 0 10px; font-size: 24px; }
+  .cta-final p { margin: 0 0 24px; color: var(--muted-foreground); font-size: 14.5px; }
+  .cta-final .ctas { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+
+  footer.site {
+    border-top: 1px solid var(--border); padding: 28px 0; font-size: 12.5px; color: var(--muted-foreground);
+  }
+  footer.site .row { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; }
+  footer.site a { text-decoration: none; font-weight: 600; }
+  footer.site a:hover { text-decoration: underline; }
+
+  code {
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 0.9em;
+    background: var(--muted); padding: 2px 6px; border-radius: 4px;
+  }
+</style>
+</head>
+<body>
+
+<header class="site">
+  <a class="brand" href="#top">
+    <img src="./mascot.svg" alt="" />
+    Canguru
+  </a>
+  <nav>
+    <a href="#como-funciona">Como funciona</a>
+    <a href="#recursos">Recursos</a>
+    <a href="#instalacao">Instalação</a>
+  </nav>
+  <div class="spacer"></div>
+  <div class="actions">
+    <button class="btn-icon" id="theme-toggle" aria-label="Alternar tema" type="button">
+      <svg id="icon-sun" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></svg>
+      <svg id="icon-moon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79Z"/></svg>
+    </button>
+    <a class="btn btn-outline" href="https://github.com/matheuspbarreto/canguru" target="_blank" rel="noreferrer">GitHub</a>
+  </div>
+</header>
+
+<main id="top">
+
+  <section class="hero wrap">
+    <img class="mascot" src="./mascot.svg" alt="Canguru" />
+    <div class="kicker">Uso interno · Evora Farma</div>
+    <h1>Rotas da Vuupt viram <span>etiquetas prontas pra imprimir</span> em segundos</h1>
+    <p class="lede">
+      Canguru busca as rotas de entrega cadastradas na Vuupt, monta um cartão de etiqueta por
+      endereço e imprime — uma etiqueta por pacote, otimizada pra bobina térmica de 72mm, sem
+      página em branco sobrando.
+    </p>
+    <div class="ctas">
+      <a class="btn btn-primary" href="https://github.com/matheuspbarreto/canguru" target="_blank" rel="noreferrer">Ver repositório</a>
+      <a class="btn btn-outline" href="https://hub.docker.com/r/matheuspbarreto/canguru" target="_blank" rel="noreferrer">Imagem no Docker Hub</a>
+    </div>
+    <p class="fineprint">Next.js 16 · Prisma + SQLite · Docker — sobe com um <code>docker compose up -d</code></p>
+
+    <div class="badges">
+      <span class="badge">Impressão térmica 72mm</span>
+      <span class="badge">Tema claro/escuro</span>
+      <span class="badge">Login via Zoho (opcional)</span>
+      <span class="badge">Auditoria completa</span>
+    </div>
+
+    <div class="mockup-frame">
+      <div class="mockup-chrome"><span></span><span></span><span></span></div>
+      <div class="mockup-app-header">
+        <div class="brand"><img src="./mascot.svg" alt="" />Canguru</div>
+        <div class="mockup-nav">
+          <span class="active">Impressos</span><span>Usuários</span><span>Configurações</span><span>Atividade</span>
+        </div>
+        <div class="right">Administrador</div>
+      </div>
+      <div class="mockup-body">
+        <div class="mockup-toolbar">
+          <span class="sel">6 de 6 selecionadas</span>
+          <span class="mockup-print-btn">🖶 Imprimir Etiquetas (6)</span>
+        </div>
+        <div class="card-grid">
+          <div class="label-card">
+            <div class="check">✓</div>
+            <div class="top"><span class="pedido">PEDIDO 1042</span><span class="logo">LOGO</span></div>
+            <div class="name">Maria Fernandes Souza</div>
+            <div class="opt"><span class="radio"></span>Pago</div>
+            <div class="opt selected"><span class="radio on"></span>A Pagar R$ 45,00</div>
+            <span class="phone">+55 21 99999-0000</span>
+            <div class="addr">R. das Palmeiras, 120 - Tijuca, Rio de Janeiro - RJ</div>
+          </div>
+          <div class="label-card">
+            <div class="check">✓</div>
+            <div class="top"><span class="pedido">PEDIDO 1043</span><span class="logo">LOGO</span></div>
+            <div class="name">Carlos Andrade Lima</div>
+            <div class="opt selected"><span class="radio on"></span>Pago</div>
+            <div class="opt"><span class="radio"></span>A Pagar R$</div>
+            <span class="phone">+55 21 98888-1234</span>
+            <div class="addr">Av. Central, 900 - Centro, Niterói - RJ</div>
+          </div>
+          <div class="label-card">
+            <div class="check">✓</div>
+            <div class="top"><span class="pedido">PEDIDO 1044</span><span class="logo">LOGO</span></div>
+            <div class="name">Fábrica Nova Ltda</div>
+            <div class="opt"><span class="radio"></span>Pago</div>
+            <div class="opt"><span class="radio"></span>A Pagar R$</div>
+            <span class="phone">+55 24 97777-5678</span>
+            <div class="addr">Estr. do Bosque, 55 - Bl. 2, Petrópolis - RJ</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="como-funciona">
+    <div class="wrap">
+      <div class="section-head">
+        <div class="eyebrow">Como funciona</div>
+        <h2>Do login à etiqueta impressa</h2>
+        <p>Pensado pro dia a dia do operador que separa e confere entregas — sem passos extras.</p>
+      </div>
+      <ol class="steps">
+        <li>
+          <div class="num">1</div>
+          <div>
+            <h3>Login</h3>
+            <p>Usuário e senha, ou login com um clique via Zoho OAuth (se habilitado pelo administrador).</p>
+          </div>
+        </li>
+        <li>
+          <div class="num">2</div>
+          <div>
+            <h3>Escolha da rota</h3>
+            <p>A tela já traz a rota mais recente selecionada — dá pra trocar num combobox com busca por nome ou data.</p>
+          </div>
+        </li>
+        <li>
+          <div class="num">3</div>
+          <div>
+            <h3>Conferência das etiquetas</h3>
+            <p>Um cartão por endereço: pedido, cliente, telefone, endereço completo e logo da empresa. Campos "Pago"/"A Pagar" ficam marcáveis direto na tela, com valor em negrito na etiqueta.</p>
+          </div>
+        </li>
+        <li>
+          <div class="num">4</div>
+          <div>
+            <h3>Impressão</h3>
+            <p>"Selecionar todas" vem marcado por padrão — desmarque o que não vai sair e imprima. Layout ajustado pra bobina de 72mm, uma etiqueta por página.</p>
+          </div>
+        </li>
+      </ol>
+    </div>
+  </section>
+
+  <section id="recursos" class="alt">
+    <div class="wrap">
+      <div class="section-head">
+        <div class="eyebrow">Recursos</div>
+        <h2>Pensado pra rodar sem manutenção constante</h2>
+        <p>Configuração de negócio fica no banco, editável pela própria tela — sem redeploy.</p>
+      </div>
+      <div class="feature-grid">
+        <div class="feature">
+          <div class="icon">👥</div>
+          <h3>Usuários e papéis</h3>
+          <p>Admin ou Operador, senha opcional (pode ser só-Zoho), troca de senha forçada e encerramento remoto de sessões.</p>
+        </div>
+        <div class="feature">
+          <div class="icon">🖶</div>
+          <h3>Impressão térmica 72mm</h3>
+          <p>Uma etiqueta por página, margens configuráveis com pré-visualização ao vivo, sempre em preto sobre branco.</p>
+        </div>
+        <div class="feature">
+          <div class="icon">🌗</div>
+          <h3>Tema claro/escuro</h3>
+          <p>Interface adapta ao tema do sistema ou escolha manual — a etiqueta impressa é sempre clara, pra economizar tinta/papel.</p>
+        </div>
+        <div class="feature">
+          <div class="icon">📋</div>
+          <h3>Auditoria completa</h3>
+          <p>Log de login, alterações administrativas e impressões, com filtro por ação e paginação.</p>
+        </div>
+        <div class="feature">
+          <div class="icon">🔐</div>
+          <h3>Segurança por padrão</h3>
+          <p>Rate limiting em login e recuperação de senha, sessões JWT revogáveis, senha nunca em texto puro.</p>
+        </div>
+        <div class="feature">
+          <div class="icon">⚙️</div>
+          <h3>Configuração sem redeploy</h3>
+          <p>Nome/logo da empresa, token da Vuupt, SMTP e Zoho ficam no banco, editáveis pela tela de Configurações.</p>
+        </div>
+        <div class="feature">
+          <div class="icon">📱</div>
+          <h3>Interface responsiva</h3>
+          <p>Em telas estreitas, navegação e ações de conta (tema, trocar senha, sair, sobre) ficam num menu de gaveta.</p>
+        </div>
+        <div class="feature">
+          <div class="icon">💾</div>
+          <h3>Backup automático</h3>
+          <p>Backup diário do banco SQLite em produção, mais rotação dos 14 mais recentes.</p>
+        </div>
+      </div>
+
+      <div class="stack-row">
+        <span>Next.js 16 (App Router)</span>
+        <span>React 19 + TypeScript</span>
+        <span>Prisma + SQLite</span>
+        <span>shadcn/ui + Tailwind CSS v4</span>
+        <span>Vitest</span>
+      </div>
+    </div>
+  </section>
+
+  <section id="instalacao">
+    <div class="wrap cta-final">
+      <div class="box">
+        <h2>Sobe com um comando</h2>
+        <p><code>docker compose up -d</code> — baixa a imagem publicada, cria os volumes persistentes e já sobe com o admin padrão criado (<code>admin</code> / <code>admin</code>, troca de senha forçada no primeiro login).</p>
+        <div class="ctas">
+          <a class="btn btn-primary" href="https://github.com/matheuspbarreto/canguru#rodando-com-docker-recomendado" target="_blank" rel="noreferrer">Guia de instalação</a>
+          <a class="btn btn-outline" href="https://hub.docker.com/r/matheuspbarreto/canguru" target="_blank" rel="noreferrer">matheuspbarreto/canguru</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer class="site">
+  <div class="wrap row">
+    <span>Canguru — desenvolvido por Matheus Barreto</span>
+    <span>
+      <a href="https://github.com/matheuspbarreto/canguru" target="_blank" rel="noreferrer">GitHub</a>
+      &nbsp;·&nbsp;
+      <a href="https://hub.docker.com/r/matheuspbarreto/canguru" target="_blank" rel="noreferrer">Docker Hub</a>
+    </span>
+  </div>
+</footer>
+
+<script>
+  (function () {
+    var root = document.documentElement;
+    var toggle = document.getElementById('theme-toggle');
+    var sun = document.getElementById('icon-sun');
+    var moon = document.getElementById('icon-moon');
+    var stored = localStorage.getItem('canguru-demo-theme');
+    var prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+
+    function apply(theme) {
+      root.classList.toggle('dark', theme === 'dark');
+      sun.style.display = theme === 'dark' ? 'none' : 'block';
+      moon.style.display = theme === 'dark' ? 'block' : 'none';
+    }
+
+    var initial = stored || (prefersDark ? 'dark' : 'light');
+    apply(initial);
+
+    toggle.addEventListener('click', function () {
+      var next = root.classList.contains('dark') ? 'light' : 'dark';
+      localStorage.setItem('canguru-demo-theme', next);
+      apply(next);
+    });
+  })();
+</script>
+
+</body>
+</html>

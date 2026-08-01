@@ -1,0 +1,87 @@
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+  // "native" cobre o ambiente de desenvolvimento (Windows/Mac/Linux local);
+  // "debian-openssl-3.0.x" é o binário usado dentro da imagem Docker
+  // (base node:20-slim, Debian 12/bookworm).
+  binaryTargets = ["native", "debian-openssl-3.0.x"]
+}
+
+// SQLite não tem tipo enum nativo no Prisma; "role" é uma string restrita
+// a valores fixos na camada da aplicação (ver src/types.ts) em vez de um
+// enum do schema.
+//
+// "username" é o identificador de login (pode ser algo simples como
+// "admin", sem formato de e-mail). "email" é opcional: só é necessário
+// para recuperação de senha e para login via Zoho OAuth (o vínculo com o
+// Zoho é feito por e-mail, e só é permitido quando oauthEnabled = true).
+model User {
+  id           String    @id @default(cuid())
+  name         String
+  username     String    @unique
+  email        String?   @unique
+  passwordHash String?
+  role         String    @default("OPERATOR")
+  oauthEnabled Boolean   @default(false)
+  zohoUserId   String?   @unique
+  active       Boolean   @default(true)
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  // Força a troca de senha no próximo login (ex.: senha provisória definida
+  // pelo admin). "sessionVersion" é incluído no JWT da sessão; incrementar
+  // esse número (ex.: ao "encerrar sessões") invalida instantaneamente
+  // qualquer token antigo, mesmo sem um armazenamento de sessão no servidor.
+  mustChangePassword Boolean @default(false)
+  sessionVersion     Int     @default(0)
+
+  resetTokens  PasswordResetToken[]
+  activityLogs ActivityLog[]
+}
+
+// Log unificado de atividade: auditoria administrativa (criação/edição de
+// usuário, mudança de configuração), histórico de impressão de rotas e
+// tentativas de login — tudo usado também para o rate limiting de login e
+// de recuperação de senha (consultando entradas recentes por "action").
+model ActivityLog {
+  id         String   @id @default(cuid())
+  actorId    String?
+  actor      User?    @relation(fields: [actorId], references: [id], onDelete: SetNull)
+  actorName  String
+  action     String
+  targetType String?
+  targetId   String?
+  metadata   String?
+  createdAt  DateTime @default(now())
+
+  @@index([createdAt])
+  @@index([action, createdAt])
+}
+
+// Tokens de redefinição de senha: de uso único (usedAt marcado no consumo)
+// e com expiração curta. Só o hash do token fica no banco — o valor bruto
+// existe apenas no link enviado por e-mail.
+model PasswordResetToken {
+  id        String    @id @default(cuid())
+  userId    String
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tokenHash String    @unique
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime  @default(now())
+
+  @@index([userId])
+}
+
+// Armazenamento genérico chave/valor para tokens de integração e
+// configurações administráveis (nome da empresa, logo, token da Vuupt,
+// configuração do servidor SMTP etc).
+model Setting {
+  key       String   @id
+  value     String
+  updatedAt DateTime @updatedAt
+}

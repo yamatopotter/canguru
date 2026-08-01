@@ -1,0 +1,87 @@
+/*
+  Dimensões pensadas para bobina de impressora térmica de 72mm.
+  Na tela o cartão ganha borda/sombra para facilitar a conferência;
+  na impressão (@media print) esses adornos somem para não gastar
+  térmico do papel e o cartão vira exatamente uma etiqueta.
+*/
+.card {
+  width: 72mm;
+  min-height: 60mm;
+  padding: 4mm;
+  border: 1px solid var(--color-gray-300);
+  border-radius: var(--radius-md);
+  background: var(--color-white);
+  box-shadow: var(--shadow-card);
+  display: flex;
+  flex-direction: column;
+  gap: 2.5mm;
+}
+
+.title {
+  margin: 0;
+  font-size: 12pt;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  color: var(--color-purple-700);
+}
+
+.customerName {
+  margin: 0;
+  font-size: 14pt;
+  font-weight: 700;
+  color: var(--color-black);
+}
+
+.paymentRow {
+  display: flex;
+  align-items: center;
+  gap: 2mm;
+  font-size: 10pt;
+}
+
+.checkbox {
+  width: 4mm;
+  height: 4mm;
+  flex-shrink: 0;
+  border: 1.5pt solid var(--color-black);
+  border-radius: 2px;
+}
+
+.phone {
+  margin: 0;
+  font-size: 10pt;
+  font-weight: 600;
+}
+
+.address {
+  margin: 0;
+  font-size: 10pt;
+  line-height: 1.35;
+  color: var(--color-gray-600);
+}
+
+@media print {
+  .card {
+    border: none;
+    border-radius: 0;
+    box-shadow: none;
+    min-height: auto;
+    padding: 3mm 4mm;
+    page-break-after: always;
+    break-after: page;
+  }
+
+  .card:last-child {
+    page-break-after: auto;
+    break-after: auto;
+  }
+
+  .title {
+    color: var(--color-black);
+  }
+
+  .address {
+    color: var(--color-black);
+  }
+}

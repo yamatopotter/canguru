@@ -1,0 +1,128 @@
+.page {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  gap: 32px;
+  padding: 14px 28px;
+  background: var(--color-white);
+  border-bottom: 1px solid var(--color-gray-300);
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+
+.logoImg {
+  height: 28px;
+  width: auto;
+  max-width: 120px;
+  object-fit: contain;
+}
+
+.logoFallback {
+  width: 26px;
+  height: 26px;
+  border-radius: 6px;
+  background: var(--color-black);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.companyName {
+  font-weight: 700;
+  font-size: 0.95rem;
+  color: var(--color-black);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.nav {
+  display: flex;
+  gap: 4px;
+  flex: 1;
+}
+
+.navLink,
+.navLinkActive {
+  padding: 8px 12px;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  text-decoration: none;
+  color: var(--color-gray-600);
+}
+
+.navLink:hover {
+  background: var(--color-gray-100);
+  color: var(--color-black);
+}
+
+.navLinkActive {
+  color: var(--color-purple-700);
+  background: var(--color-purple-50);
+}
+
+.headerActions {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.userMenu {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding-left: 16px;
+  border-left: 1px solid var(--color-gray-300);
+}
+
+.userName {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--color-black);
+  white-space: nowrap;
+}
+
+.logoutButton {
+  border: none;
+  background: transparent;
+  color: var(--color-gray-600);
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 6px 8px;
+  border-radius: 6px;
+}
+
+.logoutButton:hover {
+  background: var(--color-gray-100);
+  color: var(--color-black);
+}
+
+.main {
+  flex: 1;
+  width: 100%;
+}
+
+@media (max-width: 720px) {
+  .header {
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+
+  .nav {
+    order: 3;
+    width: 100%;
+  }
+}

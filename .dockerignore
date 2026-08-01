@@ -1,0 +1,22 @@
+node_modules
+.next
+old
+backups
+coverage
+
+# segredos e dados locais nunca vão pra dentro da imagem
+.env
+.env.*
+!.env.example
+prisma/dev.db
+prisma/dev.db-journal
+prisma/test.db
+prisma/test.db-journal
+uploads/*
+!uploads/.gitkeep
+
+.git
+.gitignore
+*.md
+.vscode
+npm-debug.log*

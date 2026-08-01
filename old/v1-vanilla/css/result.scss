@@ -1,0 +1,56 @@
+#listCard{
+    font-family:Arial, Helvetica, sans-serif;
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap:20px;
+    max-width: 1200px;
+    margin: 0 auto;
+
+    h1{
+        font-size: 1.25rem;
+    }
+
+    h2{
+        font-size: 1.5rem;
+        font-weight: bold;
+    }
+    .card{
+        width:72mm;
+        min-height: 6cm;
+        padding: 5mm;
+        border: 1px solid lightgrey;
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+
+        .checkbox{
+            width: 5mm;
+            height: 5mm;
+            border: 2px solid black;
+            display: inline-block;
+            margin-right: 10px;
+        }
+    }
+}
+
+@media print{
+    nav{
+        display: none;
+    }
+
+    #listCard{
+        display: initial;
+    
+        .card{
+            page-break-after: always;
+            width:72mm;
+            padding: 5mm;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+    
+        min-height: 6cm;
+    }    
+}

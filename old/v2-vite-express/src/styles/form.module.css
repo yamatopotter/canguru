@@ -1,0 +1,53 @@
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.label {
+  font-weight: 600;
+  font-size: 0.85rem;
+  color: var(--color-gray-600);
+}
+
+.input {
+  padding: 10px 12px;
+  font-size: 0.95rem;
+  border: 1px solid var(--color-gray-300);
+  border-radius: 8px;
+  background: var(--color-white);
+  color: var(--color-black);
+  width: 100%;
+}
+
+.input:focus-visible {
+  outline: 2px solid var(--color-purple-600);
+  outline-offset: 1px;
+}
+
+.input:disabled {
+  background: var(--color-gray-100);
+  color: var(--color-gray-600);
+}
+
+.hint {
+  font-size: 0.78rem;
+  color: var(--color-gray-600);
+}
+
+.row {
+  display: flex;
+  gap: 16px;
+}
+
+.row > * {
+  flex: 1;
+}
+
+.checkboxRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.9rem;
+  color: var(--color-black);
+}
