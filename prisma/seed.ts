@@ -29,8 +29,11 @@ async function main() {
   await ensureSetting('smtp_password', '');
   await ensureSetting('smtp_from', '');
   await ensureSetting('payment_options_enabled', 'true');
+  await ensureSetting('signature_enabled', 'false');
   await ensureSetting('label_margin_top', '2');
   await ensureSetting('label_margin_bottom', '2');
+  await ensureSetting('label_margin_left', '3');
+  await ensureSetting('label_margin_right', '3');
 
   const vuuptToken = await prisma.setting.findUnique({ where: { key: 'vuupt_api_token' } });
   if (!vuuptToken?.value) {

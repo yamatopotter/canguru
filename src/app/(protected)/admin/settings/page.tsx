@@ -1,4 +1,4 @@
-import { getSetting, maskToken, SETTING_KEYS, parseLabelMargin } from '@/lib/settings';
+import { getSetting, maskToken, SETTING_KEYS, parseLabelMargin, DEFAULT_LABEL_MARGIN_X_MM } from '@/lib/settings';
 import { getVuuptTokenStatus } from '@/lib/vuupt';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { LogoUploadForm } from './LogoUploadForm';
@@ -24,8 +24,11 @@ export default async function AdminSettingsPage() {
     zohoRedirectUri,
     zohoAccountsBaseUrl,
     paymentOptionsEnabled,
+    signatureEnabled,
     marginTop,
     marginBottom,
+    marginLeft,
+    marginRight,
   ] = await Promise.all([
     getSetting(SETTING_KEYS.companyName),
     getSetting(SETTING_KEYS.companyLogoPath),
@@ -41,8 +44,11 @@ export default async function AdminSettingsPage() {
     getSetting(SETTING_KEYS.zohoRedirectUri),
     getSetting(SETTING_KEYS.zohoAccountsBaseUrl),
     getSetting(SETTING_KEYS.paymentOptionsEnabled),
+    getSetting(SETTING_KEYS.signatureEnabled),
     getSetting(SETTING_KEYS.labelMarginTop),
     getSetting(SETTING_KEYS.labelMarginBottom),
+    getSetting(SETTING_KEYS.labelMarginLeft),
+    getSetting(SETTING_KEYS.labelMarginRight),
   ]);
 
   return (
@@ -77,8 +83,11 @@ export default async function AdminSettingsPage() {
         <TabsContent value="etiqueta">
           <LabelSettingsForm
             paymentOptionsEnabled={paymentOptionsEnabled !== 'false'}
+            signatureEnabled={signatureEnabled === 'true'}
             marginTopMm={parseLabelMargin(marginTop)}
             marginBottomMm={parseLabelMargin(marginBottom)}
+            marginLeftMm={parseLabelMargin(marginLeft, DEFAULT_LABEL_MARGIN_X_MM)}
+            marginRightMm={parseLabelMargin(marginRight, DEFAULT_LABEL_MARGIN_X_MM)}
           />
         </TabsContent>
 

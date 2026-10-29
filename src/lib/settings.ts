@@ -16,12 +16,16 @@ export const SETTING_KEYS = {
   zohoRedirectUri: 'zoho_redirect_uri',
   zohoAccountsBaseUrl: 'zoho_accounts_base_url',
   paymentOptionsEnabled: 'payment_options_enabled',
+  signatureEnabled: 'signature_enabled',
   labelMarginTop: 'label_margin_top',
   labelMarginBottom: 'label_margin_bottom',
+  labelMarginLeft: 'label_margin_left',
+  labelMarginRight: 'label_margin_right',
 } as const;
 
 // Valores default de margem (mm) usados quando a Setting ainda não existe.
 export const DEFAULT_LABEL_MARGIN_MM = 2;
+export const DEFAULT_LABEL_MARGIN_X_MM = 3;
 
 export async function getSetting(key: string): Promise<string> {
   const row = await prisma.setting.findUnique({ where: { key } });
@@ -59,7 +63,8 @@ export function maskToken(token: string): string {
   return `•••• ${token.slice(-4)}`;
 }
 
-export function parseLabelMargin(value: string): number {
-  const parsed = Number(value);
-  return Number.isFinite(parsed) && parsed >= 0 ? parsed : DEFAULT_LABEL_MARGIN_MM;
+export function parseLabelMargin(value: string, fallback = DEFAULT_LABEL_MARGIN_MM): number {
+  // Number('') é 0, então vazio (Setting inexistente) cai no default.
+  const parsed = value.trim() === '' ? NaN : Number(value);
+  return Number.isFinite(parsed) && parsed >= 0 ? parsed : fallback;
 }

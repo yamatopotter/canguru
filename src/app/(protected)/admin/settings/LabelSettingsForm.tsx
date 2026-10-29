@@ -14,14 +14,20 @@ const initialState: SettingsFormState = {};
 
 interface LabelSettingsFormProps {
   paymentOptionsEnabled: boolean;
+  signatureEnabled: boolean;
   marginTopMm: number;
   marginBottomMm: number;
+  marginLeftMm: number;
+  marginRightMm: number;
 }
 
 export function LabelSettingsForm({
   paymentOptionsEnabled,
+  signatureEnabled,
   marginTopMm,
   marginBottomMm,
+  marginLeftMm,
+  marginRightMm,
 }: LabelSettingsFormProps) {
   const [state, formAction, pending] = useActionState(updateLabelSettingsAction, initialState);
   useActionToast(state);
@@ -29,11 +35,17 @@ export function LabelSettingsForm({
   // Estado local (não o valor salvo) alimenta a pré-visualização em tempo
   // real, antes mesmo de salvar.
   const [paymentOptions, setPaymentOptions] = useState(paymentOptionsEnabled);
+  const [signature, setSignature] = useState(signatureEnabled);
   const [marginTop, setMarginTop] = useState(String(marginTopMm));
   const [marginBottom, setMarginBottom] = useState(String(marginBottomMm));
 
+  const [marginLeft, setMarginLeft] = useState(String(marginLeftMm));
+  const [marginRight, setMarginRight] = useState(String(marginRightMm));
+
   const previewMarginTop = Number(marginTop);
   const previewMarginBottom = Number(marginBottom);
+  const previewMarginLeft = Number(marginLeft);
+  const previewMarginRight = Number(marginRight);
 
   return (
     <Card>
@@ -57,6 +69,20 @@ export function LabelSettingsForm({
           <span className="-mt-2.5 text-xs text-muted-foreground">
             Desmarque pra remover essas opções das etiquetas, caso a rota não trabalhe com
             cobrança na entrega.
+          </span>
+
+          <Label className="flex items-center gap-2 font-normal">
+            <Checkbox
+              name="signatureEnabled"
+              value="on"
+              checked={signature}
+              onCheckedChange={(checked) => setSignature(checked === true)}
+            />
+            Mostrar campo de assinatura do cliente
+          </Label>
+          <span className="-mt-2.5 text-xs text-muted-foreground">
+            Adiciona uma linha &quot;Assinatura&quot; no fim de cada etiqueta, pra o cliente assinar
+            o recebimento.
           </span>
 
           <div className="grid grid-cols-2 gap-4">
@@ -88,10 +114,38 @@ export function LabelSettingsForm({
                 required
               />
             </div>
+            <div className="flex flex-col gap-1.5">
+              <Label htmlFor="margin-left">Margem esquerda (mm)</Label>
+              <Input
+                id="margin-left"
+                name="marginLeft"
+                type="number"
+                min={0}
+                max={15}
+                step={0.5}
+                value={marginLeft}
+                onChange={(event) => setMarginLeft(event.target.value)}
+                required
+              />
+            </div>
+            <div className="flex flex-col gap-1.5">
+              <Label htmlFor="margin-right">Margem direita (mm)</Label>
+              <Input
+                id="margin-right"
+                name="marginRight"
+                type="number"
+                min={0}
+                max={15}
+                step={0.5}
+                value={marginRight}
+                onChange={(event) => setMarginRight(event.target.value)}
+                required
+              />
+            </div>
           </div>
           <span className="text-xs text-muted-foreground">
-            Espaço em branco acima e abaixo do conteúdo de cada etiqueta. A margem lateral fica
-            fixa (segurança contra corte pela impressora térmica).
+            Espaço em branco ao redor do conteúdo de cada etiqueta. Evite margens laterais muito
+            pequenas pra impressora térmica não cortar o texto.
           </span>
 
           <div className="flex justify-end">
@@ -103,8 +157,11 @@ export function LabelSettingsForm({
 
         <LabelPreview
           paymentOptionsEnabled={paymentOptions}
+          signatureEnabled={signature}
           marginTopMm={Number.isFinite(previewMarginTop) ? previewMarginTop : 0}
           marginBottomMm={Number.isFinite(previewMarginBottom) ? previewMarginBottom : 0}
+          marginLeftMm={Number.isFinite(previewMarginLeft) ? previewMarginLeft : 0}
+          marginRightMm={Number.isFinite(previewMarginRight) ? previewMarginRight : 0}
         />
       </CardContent>
     </Card>

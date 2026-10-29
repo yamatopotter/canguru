@@ -6,17 +6,32 @@
 
 interface LabelPreviewProps {
   paymentOptionsEnabled: boolean;
+  signatureEnabled: boolean;
   marginTopMm: number;
   marginBottomMm: number;
+  marginLeftMm: number;
+  marginRightMm: number;
 }
 
-export function LabelPreview({ paymentOptionsEnabled, marginTopMm, marginBottomMm }: LabelPreviewProps) {
+export function LabelPreview({
+  paymentOptionsEnabled,
+  signatureEnabled,
+  marginTopMm,
+  marginBottomMm,
+  marginLeftMm,
+  marginRightMm,
+}: LabelPreviewProps) {
   return (
     <div className="flex flex-col items-center gap-2 rounded-lg border bg-muted/40 p-4">
       <span className="text-xs font-medium text-muted-foreground">Pré-visualização da etiqueta impressa</span>
       <div
-        className="flex w-[70mm] flex-col gap-[2mm] bg-white px-[3mm] text-[#18181b] shadow-md"
-        style={{ paddingTop: `${marginTopMm}mm`, paddingBottom: `${marginBottomMm}mm` }}
+        className="flex w-[70mm] flex-col gap-[2mm] bg-white text-[#18181b] shadow-md"
+        style={{
+          paddingTop: `${marginTopMm}mm`,
+          paddingBottom: `${marginBottomMm}mm`,
+          paddingLeft: `${marginLeftMm}mm`,
+          paddingRight: `${marginRightMm}mm`,
+        }}
       >
         <div className="flex items-start justify-between gap-[2mm]">
           <p className="m-0 text-[13pt] font-bold tracking-wide uppercase">PEDIDO 1234</p>
@@ -42,6 +57,13 @@ export function LabelPreview({ paymentOptionsEnabled, marginTopMm, marginBottomM
         <p className="m-0 text-[11pt] leading-snug text-[#52525b]">
           Rua Exemplo, 123 - Bairro, Cidade - UF, 00000-000
         </p>
+
+        {signatureEnabled && (
+          <div className="mt-[3mm] flex items-end gap-[2mm] text-[11pt]">
+            <span className="shrink-0">Assinatura:</span>
+            <span className="h-[8mm] flex-1 border-b border-[#18181b]" />
+          </div>
+        )}
       </div>
     </div>
   );

@@ -124,13 +124,13 @@ body {
     margin: 0 !important;
   }
 
-  /* Margem superior/inferior configurável pela tela de Configurações
-     (--label-margin-top/bottom, definidas inline por etiqueta). A margem
-     horizontal fica fixa (ver print:px-[3mm] no componente) — só o espaço
-     acima/abaixo do conteúdo de cada etiqueta é ajustável. */
+  /* Margens configuráveis pela tela de Configurações
+     (--label-margin-top/bottom/left/right, definidas inline por etiqueta). */
   .label-card {
     padding-top: var(--label-margin-top, 2mm);
     padding-bottom: var(--label-margin-bottom, 2mm);
+    padding-left: var(--label-margin-left, 3mm);
+    padding-right: var(--label-margin-right, 3mm);
   }
 }
 

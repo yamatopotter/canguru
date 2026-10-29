@@ -13,12 +13,15 @@ interface LabelCardProps {
   isLastSelected: boolean;
   logoUrl?: string | null;
   paymentOptionsEnabled: boolean;
+  signatureEnabled: boolean;
   paymentStatus: PaymentStatus;
   onPaymentStatusChange: (status: PaymentStatus) => void;
   amount: string;
   onAmountChange: (value: string) => void;
   marginTopMm: number;
   marginBottomMm: number;
+  marginLeftMm: number;
+  marginRightMm: number;
 }
 
 const DEFAULT_PRODUCT_TITLE = 'Entrega de Produtos';
@@ -78,12 +81,15 @@ export function LabelCard({
   isLastSelected,
   logoUrl,
   paymentOptionsEnabled,
+  signatureEnabled,
   paymentStatus,
   onPaymentStatusChange,
   amount,
   onAmountChange,
   marginTopMm,
   marginBottomMm,
+  marginLeftMm,
+  marginRightMm,
 }: LabelCardProps) {
   const title = service.title === DEFAULT_PRODUCT_TITLE ? service.code : service.title;
   const address = [service.address, service.address_complement].filter(Boolean).join(' ');
@@ -92,7 +98,7 @@ export function LabelCard({
     <div
       className={cn(
         'label-card relative flex w-[70mm] min-h-[60mm] flex-col gap-[2mm] rounded-md border bg-card p-[4mm] shadow-sm transition-opacity',
-        'print:mx-auto print:min-h-0 print:rounded-none print:border-none print:px-[3mm] print:shadow-none',
+        'print:mx-auto print:min-h-0 print:rounded-none print:border-none print:shadow-none',
         selected ? (isLastSelected ? 'print:break-after-auto' : 'print:break-after-page') : 'print:hidden',
         !selected && 'opacity-40',
       )}
@@ -100,6 +106,8 @@ export function LabelCard({
         {
           '--label-margin-top': `${marginTopMm}mm`,
           '--label-margin-bottom': `${marginBottomMm}mm`,
+          '--label-margin-left': `${marginLeftMm}mm`,
+          '--label-margin-right': `${marginRightMm}mm`,
         } as React.CSSProperties
       }
     >
@@ -177,6 +185,13 @@ export function LabelCard({
 
       <p className="m-0 text-[11pt] font-semibold">{service.phone_number}</p>
       <p className="m-0 text-[11pt] leading-snug text-muted-foreground print:text-foreground">{address}</p>
+
+      {signatureEnabled && (
+        <div className="mt-[3mm] flex items-end gap-[2mm] text-[11pt]">
+          <span className="shrink-0">Assinatura:</span>
+          <span className="h-[8mm] flex-1 border-b border-foreground" />
+        </div>
+      )}
     </div>
   );
 }

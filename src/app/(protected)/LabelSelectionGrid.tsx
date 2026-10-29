@@ -13,8 +13,11 @@ interface LabelSelectionGridProps {
   routeName: string;
   logoUrl: string | null;
   paymentOptionsEnabled: boolean;
+  signatureEnabled: boolean;
   marginTopMm: number;
   marginBottomMm: number;
+  marginLeftMm: number;
+  marginRightMm: number;
 }
 
 interface PaymentInfo {
@@ -30,8 +33,11 @@ export function LabelSelectionGrid({
   routeName,
   logoUrl,
   paymentOptionsEnabled,
+  signatureEnabled,
   marginTopMm,
   marginBottomMm,
+  marginLeftMm,
+  marginRightMm,
 }: LabelSelectionGridProps) {
   const [selectedIds, setSelectedIds] = useState<Set<number>>(() => new Set(services.map((service) => service.id)));
   const [payments, setPayments] = useState<Record<number, PaymentInfo>>({});
@@ -105,12 +111,15 @@ export function LabelSelectionGrid({
               isLastSelected={service.id === lastSelectedId}
               logoUrl={logoUrl}
               paymentOptionsEnabled={paymentOptionsEnabled}
+              signatureEnabled={signatureEnabled}
               paymentStatus={payment.status}
               onPaymentStatusChange={(status) => setPaymentStatus(service.id, status)}
               amount={payment.amount}
               onAmountChange={(value) => setPaymentAmount(service.id, value)}
               marginTopMm={marginTopMm}
               marginBottomMm={marginBottomMm}
+              marginLeftMm={marginLeftMm}
+              marginRightMm={marginRightMm}
             />
           );
         })}

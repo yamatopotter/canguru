@@ -1,5 +1,12 @@
 import { fetchRecentRoutes, fetchRouteServices, VuuptError } from '@/lib/vuupt';
-import { getPublicSettings, getSetting, SETTING_KEYS, DEFAULT_LABEL_MARGIN_MM, parseLabelMargin } from '@/lib/settings';
+import {
+  getPublicSettings,
+  getSetting,
+  SETTING_KEYS,
+  DEFAULT_LABEL_MARGIN_MM,
+  DEFAULT_LABEL_MARGIN_X_MM,
+  parseLabelMargin,
+} from '@/lib/settings';
 import { StatusMessage } from '@/components/StatusMessage';
 import type { RoutesPage } from '@/types';
 import { RouteSelect } from './RouteSelect';
@@ -12,14 +19,25 @@ interface RouteSelectorPageProps {
 export default async function RouteSelectorPage({ searchParams }: RouteSelectorPageProps) {
   const { routeId: requestedRouteId } = await searchParams;
 
-  const [routesResult, branding, paymentOptionsSetting, marginTopSetting, marginBottomSetting] =
-    await Promise.allSettled([
-      fetchRecentRoutes(1),
-      getPublicSettings(),
-      getSetting(SETTING_KEYS.paymentOptionsEnabled),
-      getSetting(SETTING_KEYS.labelMarginTop),
-      getSetting(SETTING_KEYS.labelMarginBottom),
-    ]);
+  const [
+    routesResult,
+    branding,
+    paymentOptionsSetting,
+    signatureSetting,
+    marginTopSetting,
+    marginBottomSetting,
+    marginLeftSetting,
+    marginRightSetting,
+  ] = await Promise.allSettled([
+    fetchRecentRoutes(1),
+    getPublicSettings(),
+    getSetting(SETTING_KEYS.paymentOptionsEnabled),
+    getSetting(SETTING_KEYS.signatureEnabled),
+    getSetting(SETTING_KEYS.labelMarginTop),
+    getSetting(SETTING_KEYS.labelMarginBottom),
+    getSetting(SETTING_KEYS.labelMarginLeft),
+    getSetting(SETTING_KEYS.labelMarginRight),
+  ]);
 
   const routesPage: RoutesPage | null = routesResult.status === 'fulfilled' ? routesResult.value : null;
   const routesError =
@@ -31,12 +49,21 @@ export default async function RouteSelectorPage({ searchParams }: RouteSelectorP
   const logoUrl = branding.status === 'fulfilled' ? branding.value.logoUrl : null;
   const paymentOptionsEnabled =
     paymentOptionsSetting.status === 'fulfilled' ? paymentOptionsSetting.value !== 'false' : true;
+  const signatureEnabled = signatureSetting.status === 'fulfilled' && signatureSetting.value === 'true';
   const marginTopMm =
     marginTopSetting.status === 'fulfilled' ? parseLabelMargin(marginTopSetting.value) : DEFAULT_LABEL_MARGIN_MM;
   const marginBottomMm =
     marginBottomSetting.status === 'fulfilled'
       ? parseLabelMargin(marginBottomSetting.value)
       : DEFAULT_LABEL_MARGIN_MM;
+  const marginLeftMm =
+    marginLeftSetting.status === 'fulfilled'
+      ? parseLabelMargin(marginLeftSetting.value, DEFAULT_LABEL_MARGIN_X_MM)
+      : DEFAULT_LABEL_MARGIN_X_MM;
+  const marginRightMm =
+    marginRightSetting.status === 'fulfilled'
+      ? parseLabelMargin(marginRightSetting.value, DEFAULT_LABEL_MARGIN_X_MM)
+      : DEFAULT_LABEL_MARGIN_X_MM;
 
   // Sem rota escolhida na URL, usa a primeira da lista (a mais recente).
   const activeRouteId = requestedRouteId || (routesPage?.routes[0] ? String(routesPage.routes[0].id) : '');
@@ -88,8 +115,11 @@ export default async function RouteSelectorPage({ searchParams }: RouteSelectorP
           routeName={activeRoute?.name ?? activeRouteId}
           logoUrl={logoUrl}
           paymentOptionsEnabled={paymentOptionsEnabled}
+          signatureEnabled={signatureEnabled}
           marginTopMm={marginTopMm}
           marginBottomMm={marginBottomMm}
+          marginLeftMm={marginLeftMm}
+          marginRightMm={marginRightMm}
         />
       )}
     </div>

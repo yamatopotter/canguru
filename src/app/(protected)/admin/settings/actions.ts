@@ -55,31 +55,34 @@ export async function updateLabelSettingsAction(
   const admin = await requireAdmin();
 
   const paymentOptionsEnabled = formData.get('paymentOptionsEnabled') === 'on';
+  const signatureEnabled = formData.get('signatureEnabled') === 'on';
   const marginTop = Number(formData.get('marginTop'));
   const marginBottom = Number(formData.get('marginBottom'));
+  const marginLeft = Number(formData.get('marginLeft'));
+  const marginRight = Number(formData.get('marginRight'));
 
   if (
-    !Number.isFinite(marginTop) ||
-    !Number.isFinite(marginBottom) ||
-    marginTop < 0 ||
-    marginBottom < 0 ||
-    marginTop > MAX_LABEL_MARGIN_MM ||
-    marginBottom > MAX_LABEL_MARGIN_MM
+    [marginTop, marginBottom, marginLeft, marginRight].some(
+      (value) => !Number.isFinite(value) || value < 0 || value > MAX_LABEL_MARGIN_MM,
+    )
   ) {
     return { error: `As margens devem ser números entre 0 e ${MAX_LABEL_MARGIN_MM}mm.` };
   }
 
   await Promise.all([
     setSetting(SETTING_KEYS.paymentOptionsEnabled, String(paymentOptionsEnabled)),
+    setSetting(SETTING_KEYS.signatureEnabled, String(signatureEnabled)),
     setSetting(SETTING_KEYS.labelMarginTop, String(marginTop)),
     setSetting(SETTING_KEYS.labelMarginBottom, String(marginBottom)),
+    setSetting(SETTING_KEYS.labelMarginLeft, String(marginLeft)),
+    setSetting(SETTING_KEYS.labelMarginRight, String(marginRight)),
   ]);
 
   await logActivity({
     actorId: admin.id,
     actorName: admin.name,
     action: ACTIVITY_ACTIONS.settingsUpdate,
-    metadata: { paymentOptionsEnabled, marginTop, marginBottom },
+    metadata: { paymentOptionsEnabled, signatureEnabled, marginTop, marginBottom, marginLeft, marginRight },
   });
 
   revalidatePath('/', 'layout');
