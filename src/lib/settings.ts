@@ -1,5 +1,6 @@
 import 'server-only';
 import { prisma } from './prisma';
+import type { LabelSize } from '@/types';
 
 export const SETTING_KEYS = {
   companyName: 'company_name',
@@ -16,6 +17,8 @@ export const SETTING_KEYS = {
   zohoRedirectUri: 'zoho_redirect_uri',
   zohoAccountsBaseUrl: 'zoho_accounts_base_url',
   paymentOptionsEnabled: 'payment_options_enabled',
+  labelSize: 'label_size',
+  dateEnabled: 'date_enabled',
   signatureEnabled: 'signature_enabled',
   labelMarginTop: 'label_margin_top',
   labelMarginBottom: 'label_margin_bottom',
@@ -61,6 +64,10 @@ export function maskToken(token: string): string {
   if (!token) return '';
   if (token.length <= 4) return '••••';
   return `•••• ${token.slice(-4)}`;
+}
+
+export function parseLabelSize(value: string): LabelSize {
+  return value === '10x15' ? '10x15' : '72mm';
 }
 
 export function parseLabelMargin(value: string, fallback = DEFAULT_LABEL_MARGIN_MM): number {

@@ -4,7 +4,7 @@ import path from 'node:path';
 import fs from 'node:fs/promises';
 import { revalidatePath } from 'next/cache';
 import { requireAdmin } from '@/lib/auth/guards';
-import { getSetting, setSetting, SETTING_KEYS } from '@/lib/settings';
+import { getSetting, setSetting, SETTING_KEYS, parseLabelSize } from '@/lib/settings';
 import { verifySmtpConnection, MailerError } from '@/lib/mailer';
 import { checkVuuptConnection, VuuptError } from '@/lib/vuupt';
 import { ACTIVITY_ACTIONS, logActivity } from '@/lib/activity';
@@ -56,6 +56,8 @@ export async function updateLabelSettingsAction(
 
   const paymentOptionsEnabled = formData.get('paymentOptionsEnabled') === 'on';
   const signatureEnabled = formData.get('signatureEnabled') === 'on';
+  const dateEnabled = formData.get('dateEnabled') === 'on';
+  const labelSize = parseLabelSize(String(formData.get('labelSize') ?? ''));
   const marginTop = Number(formData.get('marginTop'));
   const marginBottom = Number(formData.get('marginBottom'));
   const marginLeft = Number(formData.get('marginLeft'));
@@ -71,6 +73,8 @@ export async function updateLabelSettingsAction(
 
   await Promise.all([
     setSetting(SETTING_KEYS.paymentOptionsEnabled, String(paymentOptionsEnabled)),
+    setSetting(SETTING_KEYS.labelSize, labelSize),
+    setSetting(SETTING_KEYS.dateEnabled, String(dateEnabled)),
     setSetting(SETTING_KEYS.signatureEnabled, String(signatureEnabled)),
     setSetting(SETTING_KEYS.labelMarginTop, String(marginTop)),
     setSetting(SETTING_KEYS.labelMarginBottom, String(marginBottom)),
@@ -82,7 +86,7 @@ export async function updateLabelSettingsAction(
     actorId: admin.id,
     actorName: admin.name,
     action: ACTIVITY_ACTIONS.settingsUpdate,
-    metadata: { paymentOptionsEnabled, signatureEnabled, marginTop, marginBottom, marginLeft, marginRight },
+    metadata: { paymentOptionsEnabled, labelSize, dateEnabled, signatureEnabled, marginTop, marginBottom, marginLeft, marginRight },
   });
 
   revalidatePath('/', 'layout');

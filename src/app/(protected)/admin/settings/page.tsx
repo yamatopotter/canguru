@@ -1,4 +1,4 @@
-import { getSetting, maskToken, SETTING_KEYS, parseLabelMargin, DEFAULT_LABEL_MARGIN_X_MM } from '@/lib/settings';
+import { getSetting, maskToken, SETTING_KEYS, parseLabelMargin, parseLabelSize, DEFAULT_LABEL_MARGIN_X_MM } from '@/lib/settings';
 import { getVuuptTokenStatus } from '@/lib/vuupt';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { LogoUploadForm } from './LogoUploadForm';
@@ -25,6 +25,8 @@ export default async function AdminSettingsPage() {
     zohoAccountsBaseUrl,
     paymentOptionsEnabled,
     signatureEnabled,
+    labelSize,
+    dateEnabled,
     marginTop,
     marginBottom,
     marginLeft,
@@ -45,6 +47,8 @@ export default async function AdminSettingsPage() {
     getSetting(SETTING_KEYS.zohoAccountsBaseUrl),
     getSetting(SETTING_KEYS.paymentOptionsEnabled),
     getSetting(SETTING_KEYS.signatureEnabled),
+    getSetting(SETTING_KEYS.labelSize),
+    getSetting(SETTING_KEYS.dateEnabled),
     getSetting(SETTING_KEYS.labelMarginTop),
     getSetting(SETTING_KEYS.labelMarginBottom),
     getSetting(SETTING_KEYS.labelMarginLeft),
@@ -84,6 +88,8 @@ export default async function AdminSettingsPage() {
           <LabelSettingsForm
             paymentOptionsEnabled={paymentOptionsEnabled !== 'false'}
             signatureEnabled={signatureEnabled === 'true'}
+            labelSize={parseLabelSize(labelSize)}
+            dateEnabled={dateEnabled === 'true'}
             marginTopMm={parseLabelMargin(marginTop)}
             marginBottomMm={parseLabelMargin(marginBottom)}
             marginLeftMm={parseLabelMargin(marginLeft, DEFAULT_LABEL_MARGIN_X_MM)}

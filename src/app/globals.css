@@ -134,6 +134,20 @@ body {
   }
 }
 
+/* Etiqueta 10x15: 100mm de largura (66.67mm × zoom 1.5 do LabelCard). Em tela
+   o cartão fica com o mesmo tamanho; na impressão a altura é fixada em 149.5mm
+   (0.5mm a menos que a página, pra arredondamento não gerar página em branco). */
+.label-card-10x15 {
+  width: calc(100mm / 1.5);
+  min-height: calc(150mm / 1.5);
+}
+
+@media print {
+  .label-card-10x15 {
+    height: calc(149.5mm / 1.5);
+  }
+}
+
 @theme inline {
   --font-heading: var(--font-sans);
   --font-sans: var(--font-sans);

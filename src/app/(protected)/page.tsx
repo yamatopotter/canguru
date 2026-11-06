@@ -6,6 +6,7 @@ import {
   DEFAULT_LABEL_MARGIN_MM,
   DEFAULT_LABEL_MARGIN_X_MM,
   parseLabelMargin,
+  parseLabelSize,
 } from '@/lib/settings';
 import { StatusMessage } from '@/components/StatusMessage';
 import type { RoutesPage } from '@/types';
@@ -24,6 +25,8 @@ export default async function RouteSelectorPage({ searchParams }: RouteSelectorP
     branding,
     paymentOptionsSetting,
     signatureSetting,
+    labelSizeSetting,
+    dateSetting,
     marginTopSetting,
     marginBottomSetting,
     marginLeftSetting,
@@ -33,6 +36,8 @@ export default async function RouteSelectorPage({ searchParams }: RouteSelectorP
     getPublicSettings(),
     getSetting(SETTING_KEYS.paymentOptionsEnabled),
     getSetting(SETTING_KEYS.signatureEnabled),
+    getSetting(SETTING_KEYS.labelSize),
+    getSetting(SETTING_KEYS.dateEnabled),
     getSetting(SETTING_KEYS.labelMarginTop),
     getSetting(SETTING_KEYS.labelMarginBottom),
     getSetting(SETTING_KEYS.labelMarginLeft),
@@ -50,6 +55,8 @@ export default async function RouteSelectorPage({ searchParams }: RouteSelectorP
   const paymentOptionsEnabled =
     paymentOptionsSetting.status === 'fulfilled' ? paymentOptionsSetting.value !== 'false' : true;
   const signatureEnabled = signatureSetting.status === 'fulfilled' && signatureSetting.value === 'true';
+  const labelSize = labelSizeSetting.status === 'fulfilled' ? parseLabelSize(labelSizeSetting.value) : '72mm';
+  const dateEnabled = dateSetting.status === 'fulfilled' && dateSetting.value === 'true';
   const marginTopMm =
     marginTopSetting.status === 'fulfilled' ? parseLabelMargin(marginTopSetting.value) : DEFAULT_LABEL_MARGIN_MM;
   const marginBottomMm =
@@ -116,6 +123,8 @@ export default async function RouteSelectorPage({ searchParams }: RouteSelectorP
           logoUrl={logoUrl}
           paymentOptionsEnabled={paymentOptionsEnabled}
           signatureEnabled={signatureEnabled}
+          labelSize={labelSize}
+          dateEnabled={dateEnabled}
           marginTopMm={marginTopMm}
           marginBottomMm={marginBottomMm}
           marginLeftMm={marginLeftMm}

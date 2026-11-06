@@ -1,10 +1,11 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useSyncExternalStore } from 'react';
+import { flushSync } from 'react-dom';
 import { LabelCard, type PaymentStatus } from '@/components/LabelCard';
 import { Button } from '@/components/ui/button';
 import { logPrintAction } from './actions';
-import type { ServiceWithCustomer } from '@/types';
+import type { LabelSize, ServiceWithCustomer } from '@/types';
 import { PrinterIcon } from 'lucide-react';
 
 interface LabelSelectionGridProps {
@@ -14,6 +15,8 @@ interface LabelSelectionGridProps {
   logoUrl: string | null;
   paymentOptionsEnabled: boolean;
   signatureEnabled: boolean;
+  labelSize: LabelSize;
+  dateEnabled: boolean;
   marginTopMm: number;
   marginBottomMm: number;
   marginLeftMm: number;
@@ -27,6 +30,15 @@ interface PaymentInfo {
 
 const EMPTY_PAYMENT: PaymentInfo = { status: null, amount: '' };
 
+function subscribeNever() {
+  return () => {};
+}
+
+// Data sempre no fuso do Brasil, independente do fuso do servidor/navegador.
+function formatToday() {
+  return new Date().toLocaleDateString('pt-BR', { timeZone: 'America/Sao_Paulo' });
+}
+
 export function LabelSelectionGrid({
   services,
   routeId,
@@ -34,6 +46,8 @@ export function LabelSelectionGrid({
   logoUrl,
   paymentOptionsEnabled,
   signatureEnabled,
+  labelSize,
+  dateEnabled,
   marginTopMm,
   marginBottomMm,
   marginLeftMm,
@@ -41,6 +55,10 @@ export function LabelSelectionGrid({
 }: LabelSelectionGridProps) {
   const [selectedIds, setSelectedIds] = useState<Set<number>>(() => new Set(services.map((service) => service.id)));
   const [payments, setPayments] = useState<Record<number, PaymentInfo>>({});
+  // Data automática (não editável). No servidor/hidratação é vazia pra evitar
+  // divergência; no cliente é recalculada a cada render (e forçada ao imprimir).
+  const today = useSyncExternalStore(subscribeNever, formatToday, () => '');
+  const [, forceRender] = useState(0);
 
   function toggle(id: number) {
     setSelectedIds((current) => {
@@ -78,6 +96,7 @@ export function LabelSelectionGrid({
 
   async function handlePrint() {
     await logPrintAction(routeId, routeName, selectedServices.length);
+    flushSync(() => forceRender((count) => count + 1));
     window.print();
   }
 
@@ -99,6 +118,11 @@ export function LabelSelectionGrid({
         </Button>
       </div>
 
+      {labelSize === '10x15' && (
+        // Sobrescreve o @page da térmica (globals.css) só enquanto esta tela está aberta.
+        <style>{'@media print { @page { size: 100mm 150mm; margin: 0; } }'}</style>
+      )}
+
       <div className="flex flex-wrap justify-center gap-4 print:block">
         {services.map((service) => {
           const payment = payments[service.id] ?? EMPTY_PAYMENT;
@@ -112,6 +136,8 @@ export function LabelSelectionGrid({
               logoUrl={logoUrl}
               paymentOptionsEnabled={paymentOptionsEnabled}
               signatureEnabled={signatureEnabled}
+              labelSize={labelSize}
+              dateLabel={dateEnabled && today ? today : null}
               paymentStatus={payment.status}
               onPaymentStatusChange={(status) => setPaymentStatus(service.id, status)}
               amount={payment.amount}

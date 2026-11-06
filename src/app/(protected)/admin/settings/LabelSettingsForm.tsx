@@ -9,12 +9,15 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useActionToast } from '@/hooks/useActionToast';
 import { LabelPreview } from './LabelPreview';
+import { LABEL_10X15_MARGIN_MM, LABEL_SIZE_OPTIONS, type LabelSize } from '@/types';
 
 const initialState: SettingsFormState = {};
 
 interface LabelSettingsFormProps {
   paymentOptionsEnabled: boolean;
   signatureEnabled: boolean;
+  labelSize: LabelSize;
+  dateEnabled: boolean;
   marginTopMm: number;
   marginBottomMm: number;
   marginLeftMm: number;
@@ -24,6 +27,8 @@ interface LabelSettingsFormProps {
 export function LabelSettingsForm({
   paymentOptionsEnabled,
   signatureEnabled,
+  labelSize: initialLabelSize,
+  dateEnabled,
   marginTopMm,
   marginBottomMm,
   marginLeftMm,
@@ -36,6 +41,8 @@ export function LabelSettingsForm({
   // real, antes mesmo de salvar.
   const [paymentOptions, setPaymentOptions] = useState(paymentOptionsEnabled);
   const [signature, setSignature] = useState(signatureEnabled);
+  const [labelSize, setLabelSize] = useState<LabelSize>(initialLabelSize);
+  const [showDate, setShowDate] = useState(dateEnabled);
   const [marginTop, setMarginTop] = useState(String(marginTopMm));
   const [marginBottom, setMarginBottom] = useState(String(marginBottomMm));
 
@@ -73,6 +80,19 @@ export function LabelSettingsForm({
 
           <Label className="flex items-center gap-2 font-normal">
             <Checkbox
+              name="dateEnabled"
+              value="on"
+              checked={showDate}
+              onCheckedChange={(checked) => setShowDate(checked === true)}
+            />
+            Mostrar data de impressão
+          </Label>
+          <span className="-mt-2.5 text-xs text-muted-foreground">
+            A data de hoje é preenchida automaticamente na etiqueta e não pode ser editada.
+          </span>
+
+          <Label className="flex items-center gap-2 font-normal">
+            <Checkbox
               name="signatureEnabled"
               value="on"
               checked={signature}
@@ -85,6 +105,36 @@ export function LabelSettingsForm({
             o recebimento.
           </span>
 
+          <fieldset className="flex flex-col gap-2">
+            <legend className="mb-1 text-sm font-medium">Tamanho da etiqueta</legend>
+            {(Object.keys(LABEL_SIZE_OPTIONS) as LabelSize[]).map((size) => (
+              <Label key={size} className="flex items-center gap-2 font-normal">
+                <input
+                  type="radio"
+                  name="labelSize"
+                  value={size}
+                  checked={labelSize === size}
+                  onChange={() => setLabelSize(size)}
+                  className="size-4 accent-primary"
+                />
+                {LABEL_SIZE_OPTIONS[size]}
+              </Label>
+            ))}
+          </fieldset>
+
+          {labelSize === '10x15' ? (
+            <>
+              {/* Valores atuais seguem sendo enviados pra não zerar as margens da térmica ao salvar. */}
+              <input type="hidden" name="marginTop" value={marginTop} />
+              <input type="hidden" name="marginBottom" value={marginBottom} />
+              <input type="hidden" name="marginLeft" value={marginLeft} />
+              <input type="hidden" name="marginRight" value={marginRight} />
+              <span className="text-xs text-muted-foreground">
+                A etiqueta 10x15 usa margem fixa de {LABEL_10X15_MARGIN_MM / 10}cm nos quatro lados.
+              </span>
+            </>
+          ) : (
+          <>
           <div className="grid grid-cols-2 gap-4">
             <div className="flex flex-col gap-1.5">
               <Label htmlFor="margin-top">Margem superior (mm)</Label>
@@ -147,6 +197,8 @@ export function LabelSettingsForm({
             Espaço em branco ao redor do conteúdo de cada etiqueta. Evite margens laterais muito
             pequenas pra impressora térmica não cortar o texto.
           </span>
+          </>
+          )}
 
           <div className="flex justify-end">
             <Button type="submit" disabled={pending}>
@@ -158,6 +210,8 @@ export function LabelSettingsForm({
         <LabelPreview
           paymentOptionsEnabled={paymentOptions}
           signatureEnabled={signature}
+          labelSize={labelSize}
+          dateEnabled={showDate}
           marginTopMm={Number.isFinite(previewMarginTop) ? previewMarginTop : 0}
           marginBottomMm={Number.isFinite(previewMarginBottom) ? previewMarginBottom : 0}
           marginLeftMm={Number.isFinite(previewMarginLeft) ? previewMarginLeft : 0}

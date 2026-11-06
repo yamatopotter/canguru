@@ -1,5 +1,15 @@
 export const ROUTES_PER_PAGE = 10;
 
+export type LabelSize = '72mm' | '10x15';
+
+export const LABEL_SIZE_OPTIONS: Record<LabelSize, string> = {
+  '72mm': 'Térmica 72mm (bobina)',
+  '10x15': '10x15 cm',
+};
+
+// Etiqueta 10x15 sempre tem 1cm de margem nos quatro lados (não configurável).
+export const LABEL_10X15_MARGIN_MM = 10;
+
 export type Role = 'ADMIN' | 'OPERATOR';
 
 export const ROLE_LABELS: Record<Role, string> = {

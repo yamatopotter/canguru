@@ -1,6 +1,6 @@
 'use client';
 
-import type { ServiceWithCustomer } from '../types';
+import { LABEL_10X15_MARGIN_MM, type LabelSize, type ServiceWithCustomer } from '../types';
 import { Checkbox } from './ui/checkbox';
 import { cn } from '@/lib/utils';
 
@@ -14,6 +14,9 @@ interface LabelCardProps {
   logoUrl?: string | null;
   paymentOptionsEnabled: boolean;
   signatureEnabled: boolean;
+  labelSize: LabelSize;
+  // Data de impressão já formatada (preenchida automaticamente); null = não exibir.
+  dateLabel: string | null;
   paymentStatus: PaymentStatus;
   onPaymentStatusChange: (status: PaymentStatus) => void;
   amount: string;
@@ -25,6 +28,11 @@ interface LabelCardProps {
 }
 
 const DEFAULT_PRODUCT_TITLE = 'Entrega de Produtos';
+
+// A etiqueta 10x15 reaproveita o layout da térmica (tamanhos em pt/mm) e é
+// ampliada com "zoom": largura/margens são divididas pelo mesmo fator pra
+// que, depois de ampliadas, ocupem exatamente 100mm de largura e 1cm de margem.
+export const LABEL_10X15_ZOOM = 1.5;
 
 // Input nativo em vez de um botão fingindo ser radio: a marcação (o
 // "pontinho" do radio) é desenhada pelo próprio motor de renderização do
@@ -82,6 +90,8 @@ export function LabelCard({
   logoUrl,
   paymentOptionsEnabled,
   signatureEnabled,
+  labelSize,
+  dateLabel,
   paymentStatus,
   onPaymentStatusChange,
   amount,
@@ -93,21 +103,29 @@ export function LabelCard({
 }: LabelCardProps) {
   const title = service.title === DEFAULT_PRODUCT_TITLE ? service.code : service.title;
   const address = [service.address, service.address_complement].filter(Boolean).join(' ');
+  const is10x15 = labelSize === '10x15';
+  // Em 10x15 a margem é fixa de 1cm nos quatro lados, ignorando as configuráveis.
+  const marginTop = is10x15 ? LABEL_10X15_MARGIN_MM / LABEL_10X15_ZOOM : marginTopMm;
+  const marginBottom = is10x15 ? LABEL_10X15_MARGIN_MM / LABEL_10X15_ZOOM : marginBottomMm;
+  const marginLeft = is10x15 ? LABEL_10X15_MARGIN_MM / LABEL_10X15_ZOOM : marginLeftMm;
+  const marginRight = is10x15 ? LABEL_10X15_MARGIN_MM / LABEL_10X15_ZOOM : marginRightMm;
 
   return (
     <div
       className={cn(
-        'label-card relative flex w-[70mm] min-h-[60mm] flex-col gap-[2mm] rounded-md border bg-card p-[4mm] shadow-sm transition-opacity',
+        'label-card relative flex flex-col gap-[2mm] rounded-md border bg-card p-[4mm] shadow-sm transition-opacity',
+        is10x15 ? 'label-card-10x15' : 'w-[70mm] min-h-[60mm]',
         'print:mx-auto print:min-h-0 print:rounded-none print:border-none print:shadow-none',
         selected ? (isLastSelected ? 'print:break-after-auto' : 'print:break-after-page') : 'print:hidden',
         !selected && 'opacity-40',
       )}
       style={
         {
-          '--label-margin-top': `${marginTopMm}mm`,
-          '--label-margin-bottom': `${marginBottomMm}mm`,
-          '--label-margin-left': `${marginLeftMm}mm`,
-          '--label-margin-right': `${marginRightMm}mm`,
+          '--label-margin-top': `${marginTop}mm`,
+          '--label-margin-bottom': `${marginBottom}mm`,
+          '--label-margin-left': `${marginLeft}mm`,
+          '--label-margin-right': `${marginRight}mm`,
+          ...(is10x15 ? { zoom: LABEL_10X15_ZOOM } : {}),
         } as React.CSSProperties
       }
     >
@@ -185,6 +203,8 @@ export function LabelCard({
 
       <p className="m-0 text-[11pt] font-semibold">{service.phone_number}</p>
       <p className="m-0 text-[11pt] leading-snug text-muted-foreground print:text-foreground">{address}</p>
+
+      {dateLabel && <p className="m-0 text-[11pt] font-semibold">Data: {dateLabel}</p>}
 
       {signatureEnabled && (
         <div className="mt-[3mm] flex items-end gap-[2mm] text-[11pt]">

@@ -29,6 +29,8 @@ async function main() {
   await ensureSetting('smtp_password', '');
   await ensureSetting('smtp_from', '');
   await ensureSetting('payment_options_enabled', 'true');
+  await ensureSetting('label_size', '72mm');
+  await ensureSetting('date_enabled', 'false');
   await ensureSetting('signature_enabled', 'false');
   await ensureSetting('label_margin_top', '2');
   await ensureSetting('label_margin_bottom', '2');
