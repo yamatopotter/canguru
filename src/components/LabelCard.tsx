@@ -1,6 +1,14 @@
 'use client';
 
-import { LABEL_10X15_MARGIN_MM, LABEL_10X15_PRINT_OFFSET_TOP_MM, type LabelSize, type ServiceWithCustomer } from '../types';
+import type { CSSProperties } from 'react';
+import {
+  LABEL_10X15_MARGIN_MM,
+  LABEL_10X15_PRINT_OFFSET_TOP_MM,
+  type LabelSize,
+  type LabelStyle,
+  type ServiceWithCustomer,
+} from '../types';
+import { labelTextStyles } from '@/lib/labelStyle';
 import { Checkbox } from './ui/checkbox';
 import { cn } from '@/lib/utils';
 
@@ -16,6 +24,7 @@ interface LabelCardProps {
   documentEnabled: boolean;
   signatureEnabled: boolean;
   labelSize: LabelSize;
+  labelStyle: LabelStyle;
   // Data de impressão já formatada (preenchida automaticamente); null = não exibir.
   dateLabel: string | null;
   paymentStatus: PaymentStatus;
@@ -30,28 +39,25 @@ interface LabelCardProps {
 
 const DEFAULT_PRODUCT_TITLE = 'Entrega de Produtos';
 
-// Estilos de texto por tamanho de etiqueta. A 10x15 NÃO usa zoom: a Argox OS214
-// roda com fonte fraca (0,8A em vez de 2,4A), então o que pesa é a quantidade de
-// pontos pretos queimados por linha. Em vez de ampliar tudo (que engrossa todos os
-// traços em 50%), usa tamanhos reais com peso semibold e sem negrito pesado.
-export const LABEL_TEXT = {
-  '72mm': {
-    title: 'text-[13pt] font-bold',
-    name: 'text-[16pt] font-bold',
-    body: 'text-[11pt]',
-    bodyStrong: 'text-[11pt] font-semibold',
-    checkbox: 'size-[4.5mm]',
-    amountWidth: 'w-[22mm]',
-  },
-  '10x15': {
-    title: 'text-[13pt] font-semibold',
-    name: 'text-[20pt] font-semibold',
-    body: 'text-[13pt]',
-    bodyStrong: 'text-[13pt] font-semibold',
-    checkbox: 'size-[5.5mm]',
-    amountWidth: 'w-[30mm]',
-  },
-} as const;
+// Linha pra preencher à mão (Documento / Assinatura): mesmo componente e mesma
+// aparência pros dois. Linha contínua — a tracejada saiu fraca na Argox, que roda
+// com fonte fraca (0,8A em vez de 2,4A); traço fino falha, preto sólido imprime bem.
+export function FieldLine({
+  label,
+  style,
+  lineClassName,
+}: {
+  label: string;
+  style: CSSProperties;
+  lineClassName?: string;
+}) {
+  return (
+    <div className="mt-[3mm] flex items-end gap-[2mm]" style={style}>
+      <span className="shrink-0">{label}</span>
+      <span className={cn('h-[8mm] flex-1 border-b-[0.6mm] border-foreground', lineClassName)} />
+    </div>
+  );
+}
 
 // Input nativo em vez de um botão fingindo ser radio: a marcação (o
 // "pontinho" do radio) é desenhada pelo próprio motor de renderização do
@@ -65,8 +71,8 @@ function PaymentOption({
   checked,
   onSelect,
   onDeselect,
-  textClass,
-  checkboxClass,
+  style,
+  boxSize,
 }: {
   id: string;
   name: string;
@@ -74,11 +80,11 @@ function PaymentOption({
   checked: boolean;
   onSelect: () => void;
   onDeselect: () => void;
-  textClass: string;
-  checkboxClass: string;
+  style: CSSProperties;
+  boxSize: string;
 }) {
   return (
-    <label htmlFor={id} className={cn('flex items-center gap-[2mm] print:cursor-default', textClass)}>
+    <label htmlFor={id} className="flex items-center gap-[2mm] print:cursor-default" style={style}>
       <input
         type="radio"
         id={id}
@@ -91,7 +97,8 @@ function PaymentOption({
         onClick={() => {
           if (checked) onDeselect();
         }}
-        className={cn('shrink-0 accent-foreground', checkboxClass)}
+        className="shrink-0 accent-foreground"
+        style={{ width: boxSize, height: boxSize }}
       />
       {label}
     </label>
@@ -115,6 +122,7 @@ export function LabelCard({
   documentEnabled,
   signatureEnabled,
   labelSize,
+  labelStyle,
   dateLabel,
   paymentStatus,
   onPaymentStatusChange,
@@ -128,7 +136,10 @@ export function LabelCard({
   const title = service.title === DEFAULT_PRODUCT_TITLE ? service.code : service.title;
   const address = [service.address, service.address_complement].filter(Boolean).join(' ');
   const is10x15 = labelSize === '10x15';
-  const text = LABEL_TEXT[labelSize];
+  const { factor, font } = labelTextStyles(labelStyle, is10x15);
+  // Caixa de marcação e campo do valor acompanham o tamanho da fonte de pagamento.
+  const boxSize = `${labelStyle.sizes.payment * factor * 0.4}mm`;
+  const amountWidth = `${labelStyle.sizes.payment * factor * 2}mm`;
   // Em 10x15 a margem é fixa (0,5cm) nos quatro lados, ignorando as configuráveis.
   const marginTop = is10x15 ? LABEL_10X15_MARGIN_MM + LABEL_10X15_PRINT_OFFSET_TOP_MM : marginTopMm;
   const marginBottom = is10x15 ? LABEL_10X15_MARGIN_MM : marginBottomMm;
@@ -164,7 +175,7 @@ export function LabelCard({
           gastar uma linha inteira só com a logo e deixa mais papel pro
           conteúdo que o motoboy precisa ler. */}
       <div className="flex items-start justify-between gap-[2mm] pr-7 print:pr-0">
-        <p className={cn('m-0 tracking-wide text-primary uppercase print:text-foreground', text.title)}>
+        <p className="m-0 tracking-wide text-primary uppercase print:text-foreground" style={font('title')}>
           {title}
         </p>
         {logoUrl && (
@@ -173,7 +184,9 @@ export function LabelCard({
         )}
       </div>
 
-      <p className={cn('m-0 leading-tight text-foreground', text.name)}>{service.customerName ?? '—'}</p>
+      <p className="m-0 leading-tight text-foreground" style={font('name')}>
+        {service.customerName ?? '—'}
+      </p>
 
       {paymentOptionsEnabled && (
         <div className="flex flex-col gap-[1mm]">
@@ -190,8 +203,8 @@ export function LabelCard({
               checked={paymentStatus === 'pago'}
               onSelect={() => onPaymentStatusChange('pago')}
               onDeselect={() => onPaymentStatusChange(null)}
-              textClass={text.body}
-              checkboxClass={text.checkbox}
+              style={font('payment')}
+              boxSize={boxSize}
             />
           </div>
 
@@ -208,8 +221,8 @@ export function LabelCard({
               checked={paymentStatus === 'a_pagar'}
               onSelect={() => onPaymentStatusChange('a_pagar')}
               onDeselect={() => onPaymentStatusChange(null)}
-              textClass={text.body}
-              checkboxClass={text.checkbox}
+              style={font('payment')}
+              boxSize={boxSize}
             />
             <input
               type="text"
@@ -219,9 +232,8 @@ export function LabelCard({
               disabled={paymentStatus !== 'a_pagar'}
               aria-label="Valor a pagar"
               placeholder="0,00"
+              style={{ ...font('payment'), width: amountWidth }}
               className={cn(
-                text.amountWidth,
-                text.bodyStrong,
                 'rounded-sm border bg-background px-[1.5mm] outline-none transition-colors disabled:text-muted-foreground',
                 'print:rounded-none print:border-x-0 print:border-t-0 print:border-b print:border-foreground print:bg-transparent print:px-0 print:text-foreground',
                 paymentStatus === 'a_pagar' ? 'border-primary' : 'border-border',
@@ -231,26 +243,22 @@ export function LabelCard({
         </div>
       )}
 
-      <p className={cn('m-0', text.bodyStrong)}>{service.phone_number}</p>
-      <p className={cn('m-0 leading-snug text-muted-foreground print:text-foreground', text.body)}>{address}</p>
+      <p className="m-0" style={font('phone')}>
+        {service.phone_number}
+      </p>
+      <p className="m-0 leading-snug text-muted-foreground print:text-foreground" style={font('address')}>
+        {address}
+      </p>
 
-      {dateLabel && <p className={cn('m-0', text.bodyStrong)}>Data: {dateLabel}</p>}
-
-      {documentEnabled && (
-        <div className={cn('mt-[2mm] flex items-end gap-[2mm]', text.body)}>
-          <span className="shrink-0">Documento:</span>
-          <span className="h-[7mm] flex-1 border-b-[0.5mm] border-foreground" />
-        </div>
+      {dateLabel && (
+        <p className="m-0" style={font('date')}>
+          Data: {dateLabel}
+        </p>
       )}
 
-      {signatureEnabled && (
-        <div className={cn('mt-[3mm] flex items-end gap-[2mm]', text.body)}>
-          <span className="shrink-0">Assinatura:</span>
-          {/* Tracejada: linha contínua queima uma fileira inteira de pontos de uma vez,
-              o pior caso pra fonte fraca da impressora. */}
-          <span className="h-[8mm] flex-1 border-b-[0.5mm] border-dashed border-foreground" />
-        </div>
-      )}
+      {documentEnabled && <FieldLine label="Documento:" style={font('fields')} />}
+
+      {signatureEnabled && <FieldLine label="Assinatura:" style={font('fields')} />}
     </div>
   );
 }

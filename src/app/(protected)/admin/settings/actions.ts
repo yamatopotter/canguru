@@ -4,7 +4,15 @@ import path from 'node:path';
 import fs from 'node:fs/promises';
 import { revalidatePath } from 'next/cache';
 import { requireAdmin } from '@/lib/auth/guards';
-import { getSetting, setSetting, SETTING_KEYS, parseLabelSize } from '@/lib/settings';
+import {
+  getSetting,
+  setSetting,
+  SETTING_KEYS,
+  LABEL_FONT_SETTING_KEYS,
+  parseLabelSize,
+  parseLabelFontWeight,
+} from '@/lib/settings';
+import { LABEL_FONT_SECTIONS, LABEL_FONT_SIZE_RANGE, LABEL_SCALE_RANGE } from '@/types';
 import { verifySmtpConnection, MailerError } from '@/lib/mailer';
 import { checkVuuptConnection, VuuptError } from '@/lib/vuupt';
 import { ACTIVITY_ACTIONS, logActivity } from '@/lib/activity';
@@ -59,6 +67,13 @@ export async function updateLabelSettingsAction(
   const signatureEnabled = formData.get('signatureEnabled') === 'on';
   const dateEnabled = formData.get('dateEnabled') === 'on';
   const labelSize = parseLabelSize(String(formData.get('labelSize') ?? ''));
+  const fontWeight = parseLabelFontWeight(String(formData.get('fontWeight') ?? ''));
+  const scale = Number(formData.get('scale'));
+  const fontSizes = LABEL_FONT_SECTIONS.map(({ key, label }) => ({
+    key,
+    label,
+    value: Number(formData.get(`font_${key}`)),
+  }));
   const marginTop = Number(formData.get('marginTop'));
   const marginBottom = Number(formData.get('marginBottom'));
   const marginLeft = Number(formData.get('marginLeft'));
@@ -72,7 +87,22 @@ export async function updateLabelSettingsAction(
     return { error: `As margens devem ser números entre 0 e ${MAX_LABEL_MARGIN_MM}mm.` };
   }
 
+  if (!Number.isFinite(scale) || scale < LABEL_SCALE_RANGE.min || scale > LABEL_SCALE_RANGE.max) {
+    return { error: `A escala deve estar entre ${LABEL_SCALE_RANGE.min} e ${LABEL_SCALE_RANGE.max}.` };
+  }
+  const badFont = fontSizes.find(
+    ({ value }) => !Number.isFinite(value) || value < LABEL_FONT_SIZE_RANGE.min || value > LABEL_FONT_SIZE_RANGE.max,
+  );
+  if (badFont) {
+    return {
+      error: `O tamanho da fonte de "${badFont.label}" deve estar entre ${LABEL_FONT_SIZE_RANGE.min} e ${LABEL_FONT_SIZE_RANGE.max}pt.`,
+    };
+  }
+
   await Promise.all([
+    setSetting(SETTING_KEYS.labelFontWeight, fontWeight),
+    setSetting(SETTING_KEYS.labelScale, String(scale)),
+    ...fontSizes.map(({ key, value }) => setSetting(LABEL_FONT_SETTING_KEYS[key], String(value))),
     setSetting(SETTING_KEYS.paymentOptionsEnabled, String(paymentOptionsEnabled)),
     setSetting(SETTING_KEYS.labelSize, labelSize),
     setSetting(SETTING_KEYS.dateEnabled, String(dateEnabled)),
@@ -88,7 +118,7 @@ export async function updateLabelSettingsAction(
     actorId: admin.id,
     actorName: admin.name,
     action: ACTIVITY_ACTIONS.settingsUpdate,
-    metadata: { paymentOptionsEnabled, labelSize, dateEnabled, documentEnabled, signatureEnabled, marginTop, marginBottom, marginLeft, marginRight },
+    metadata: { paymentOptionsEnabled, labelSize, dateEnabled, documentEnabled, signatureEnabled, fontWeight, scale, fontSizes: Object.fromEntries(fontSizes.map(({ key, value }) => [key, value])), marginTop, marginBottom, marginLeft, marginRight },
   });
 
   revalidatePath('/', 'layout');

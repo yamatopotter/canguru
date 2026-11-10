@@ -30,6 +30,15 @@ async function main() {
   await ensureSetting('smtp_from', '');
   await ensureSetting('payment_options_enabled', 'true');
   await ensureSetting('label_size', '72mm');
+  await ensureSetting('label_font_weight', 'semibold');
+  await ensureSetting('label_scale', '1.25');
+  await ensureSetting('label_font_title', '13');
+  await ensureSetting('label_font_name', '16');
+  await ensureSetting('label_font_phone', '11');
+  await ensureSetting('label_font_address', '11');
+  await ensureSetting('label_font_date', '11');
+  await ensureSetting('label_font_payment', '11');
+  await ensureSetting('label_font_fields', '11');
   await ensureSetting('date_enabled', 'false');
   await ensureSetting('document_enabled', 'false');
   await ensureSetting('signature_enabled', 'false');

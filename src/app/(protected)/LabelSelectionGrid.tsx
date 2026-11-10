@@ -5,7 +5,7 @@ import { flushSync } from 'react-dom';
 import { LabelCard, type PaymentStatus } from '@/components/LabelCard';
 import { Button } from '@/components/ui/button';
 import { logPrintAction } from './actions';
-import type { LabelSize, ServiceWithCustomer } from '@/types';
+import type { LabelSize, LabelStyle, ServiceWithCustomer } from '@/types';
 import { PrinterIcon } from 'lucide-react';
 
 interface LabelSelectionGridProps {
@@ -17,6 +17,7 @@ interface LabelSelectionGridProps {
   documentEnabled: boolean;
   signatureEnabled: boolean;
   labelSize: LabelSize;
+  labelStyle: LabelStyle;
   dateEnabled: boolean;
   marginTopMm: number;
   marginBottomMm: number;
@@ -49,6 +50,7 @@ export function LabelSelectionGrid({
   documentEnabled,
   signatureEnabled,
   labelSize,
+  labelStyle,
   dateEnabled,
   marginTopMm,
   marginBottomMm,
@@ -140,6 +142,7 @@ export function LabelSelectionGrid({
               documentEnabled={documentEnabled}
               signatureEnabled={signatureEnabled}
               labelSize={labelSize}
+              labelStyle={labelStyle}
               dateLabel={dateEnabled && today ? today : null}
               paymentStatus={payment.status}
               onPaymentStatusChange={(status) => setPaymentStatus(service.id, status)}

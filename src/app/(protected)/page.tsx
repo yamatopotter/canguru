@@ -1,5 +1,6 @@
 import { fetchRecentRoutes, fetchRouteServices, VuuptError } from '@/lib/vuupt';
 import {
+  getLabelStyle,
   getPublicSettings,
   getSetting,
   SETTING_KEYS,
@@ -9,7 +10,7 @@ import {
   parseLabelSize,
 } from '@/lib/settings';
 import { StatusMessage } from '@/components/StatusMessage';
-import type { RoutesPage } from '@/types';
+import { DEFAULT_LABEL_STYLE, type RoutesPage } from '@/types';
 import { RouteSelect } from './RouteSelect';
 import { LabelSelectionGrid } from './LabelSelectionGrid';
 
@@ -27,6 +28,7 @@ export default async function RouteSelectorPage({ searchParams }: RouteSelectorP
     documentSetting,
     signatureSetting,
     labelSizeSetting,
+    labelStyleResult,
     dateSetting,
     marginTopSetting,
     marginBottomSetting,
@@ -39,6 +41,7 @@ export default async function RouteSelectorPage({ searchParams }: RouteSelectorP
     getSetting(SETTING_KEYS.documentEnabled),
     getSetting(SETTING_KEYS.signatureEnabled),
     getSetting(SETTING_KEYS.labelSize),
+    getLabelStyle(),
     getSetting(SETTING_KEYS.dateEnabled),
     getSetting(SETTING_KEYS.labelMarginTop),
     getSetting(SETTING_KEYS.labelMarginBottom),
@@ -59,6 +62,7 @@ export default async function RouteSelectorPage({ searchParams }: RouteSelectorP
   const documentEnabled = documentSetting.status === 'fulfilled' && documentSetting.value === 'true';
   const signatureEnabled = signatureSetting.status === 'fulfilled' && signatureSetting.value === 'true';
   const labelSize = labelSizeSetting.status === 'fulfilled' ? parseLabelSize(labelSizeSetting.value) : '72mm';
+  const labelStyle = labelStyleResult.status === 'fulfilled' ? labelStyleResult.value : DEFAULT_LABEL_STYLE;
   const dateEnabled = dateSetting.status === 'fulfilled' && dateSetting.value === 'true';
   const marginTopMm =
     marginTopSetting.status === 'fulfilled' ? parseLabelMargin(marginTopSetting.value) : DEFAULT_LABEL_MARGIN_MM;
@@ -128,6 +132,7 @@ export default async function RouteSelectorPage({ searchParams }: RouteSelectorP
           documentEnabled={documentEnabled}
           signatureEnabled={signatureEnabled}
           labelSize={labelSize}
+          labelStyle={labelStyle}
           dateEnabled={dateEnabled}
           marginTopMm={marginTopMm}
           marginBottomMm={marginBottomMm}

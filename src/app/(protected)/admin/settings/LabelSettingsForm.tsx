@@ -9,7 +9,19 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useActionToast } from '@/hooks/useActionToast';
 import { LabelPreview } from './LabelPreview';
-import { LABEL_10X15_MARGIN_MM, LABEL_SIZE_OPTIONS, type LabelSize } from '@/types';
+import {
+  DEFAULT_LABEL_STYLE,
+  LABEL_10X15_MARGIN_MM,
+  LABEL_FONT_SECTIONS,
+  LABEL_FONT_SIZE_RANGE,
+  LABEL_FONT_WEIGHT_OPTIONS,
+  LABEL_SCALE_RANGE,
+  LABEL_SIZE_OPTIONS,
+  type LabelFontSizes,
+  type LabelFontWeight,
+  type LabelSize,
+  type LabelStyle,
+} from '@/types';
 
 const initialState: SettingsFormState = {};
 
@@ -18,6 +30,7 @@ interface LabelSettingsFormProps {
   documentEnabled: boolean;
   signatureEnabled: boolean;
   labelSize: LabelSize;
+  labelStyle: LabelStyle;
   dateEnabled: boolean;
   marginTopMm: number;
   marginBottomMm: number;
@@ -30,6 +43,7 @@ export function LabelSettingsForm({
   documentEnabled,
   signatureEnabled,
   labelSize: initialLabelSize,
+  labelStyle: initialLabelStyle,
   dateEnabled,
   marginTopMm,
   marginBottomMm,
@@ -46,6 +60,28 @@ export function LabelSettingsForm({
   const [signature, setSignature] = useState(signatureEnabled);
   const [labelSize, setLabelSize] = useState<LabelSize>(initialLabelSize);
   const [showDate, setShowDate] = useState(dateEnabled);
+  const [fontWeight, setFontWeight] = useState<LabelFontWeight>(initialLabelStyle.weight);
+  const [scale, setScale] = useState(String(initialLabelStyle.scale));
+  const [fontSizes, setFontSizes] = useState<Record<keyof LabelFontSizes, string>>(
+    () =>
+      Object.fromEntries(
+        LABEL_FONT_SECTIONS.map(({ key }) => [key, String(initialLabelStyle.sizes[key])]),
+      ) as Record<keyof LabelFontSizes, string>,
+  );
+
+  // Valor inválido/vazio na digitação cai no padrão só na pré-visualização;
+  // o servidor valida de verdade ao salvar.
+  const previewScale = Number(scale);
+  const previewStyle: LabelStyle = {
+    weight: fontWeight,
+    scale: Number.isFinite(previewScale) && previewScale > 0 ? previewScale : DEFAULT_LABEL_STYLE.scale,
+    sizes: Object.fromEntries(
+      LABEL_FONT_SECTIONS.map(({ key }) => {
+        const size = Number(fontSizes[key]);
+        return [key, Number.isFinite(size) && size > 0 ? size : DEFAULT_LABEL_STYLE.sizes[key]];
+      }),
+    ) as unknown as LabelFontSizes,
+  };
   const [marginTop, setMarginTop] = useState(String(marginTopMm));
   const [marginBottom, setMarginBottom] = useState(String(marginBottomMm));
 
@@ -139,6 +175,66 @@ export function LabelSettingsForm({
             ))}
           </fieldset>
 
+          <fieldset className="flex flex-col gap-3">
+            <legend className="mb-1 text-sm font-medium">Aparência do texto</legend>
+            <div className="flex flex-wrap gap-x-4 gap-y-2">
+              {(Object.keys(LABEL_FONT_WEIGHT_OPTIONS) as LabelFontWeight[]).map((weight) => (
+                <Label key={weight} className="flex items-center gap-2 font-normal">
+                  <input
+                    type="radio"
+                    name="fontWeight"
+                    value={weight}
+                    checked={fontWeight === weight}
+                    onChange={() => setFontWeight(weight)}
+                    className="size-4 accent-primary"
+                  />
+                  {LABEL_FONT_WEIGHT_OPTIONS[weight]}
+                </Label>
+              ))}
+            </div>
+            <span className="text-xs text-muted-foreground">
+              Fonte mais leve reduz a carga na impressora, mas traço muito fino pode falhar em
+              impressora fraca.
+            </span>
+
+            <div className="flex flex-col gap-1.5">
+              <Label htmlFor="label-scale">Escala do conteúdo (só etiqueta 10x15)</Label>
+              <Input
+                id="label-scale"
+                name="scale"
+                type="number"
+                min={LABEL_SCALE_RANGE.min}
+                max={LABEL_SCALE_RANGE.max}
+                step={0.05}
+                value={scale}
+                onChange={(event) => setScale(event.target.value)}
+                required
+              />
+              <span className="text-xs text-muted-foreground">
+                Multiplica os tamanhos de fonte abaixo (1 = tamanho original).
+              </span>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              {LABEL_FONT_SECTIONS.map(({ key, label }) => (
+                <div key={key} className="flex flex-col gap-1.5">
+                  <Label htmlFor={`font-${key}`}>{label} (pt)</Label>
+                  <Input
+                    id={`font-${key}`}
+                    name={`font_${key}`}
+                    type="number"
+                    min={LABEL_FONT_SIZE_RANGE.min}
+                    max={LABEL_FONT_SIZE_RANGE.max}
+                    step={0.5}
+                    value={fontSizes[key]}
+                    onChange={(event) => setFontSizes((current) => ({ ...current, [key]: event.target.value }))}
+                    required
+                  />
+                </div>
+              ))}
+            </div>
+          </fieldset>
+
           {labelSize === '10x15' ? (
             <>
               {/* Valores atuais seguem sendo enviados pra não zerar as margens da térmica ao salvar. */}
@@ -229,6 +325,7 @@ export function LabelSettingsForm({
           documentEnabled={documentField}
           signatureEnabled={signature}
           labelSize={labelSize}
+          labelStyle={previewStyle}
           dateEnabled={showDate}
           marginTopMm={Number.isFinite(previewMarginTop) ? previewMarginTop : 0}
           marginBottomMm={Number.isFinite(previewMarginBottom) ? previewMarginBottom : 0}

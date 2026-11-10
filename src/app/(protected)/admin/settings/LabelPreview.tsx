@@ -4,9 +4,9 @@
 // porque este é sempre visível na tela (pra refletir a margem ao digitar),
 // enquanto o LabelCard usa @media print pra boa parte do próprio estilo.
 
-import { LABEL_10X15_MARGIN_MM, type LabelSize } from '@/types';
-import { LABEL_TEXT } from '@/components/LabelCard';
-import { cn } from '@/lib/utils';
+import { LABEL_10X15_MARGIN_MM, type LabelSize, type LabelStyle } from '@/types';
+import { FieldLine } from '@/components/LabelCard';
+import { labelTextStyles } from '@/lib/labelStyle';
 
 // Reduz a etiqueta 10x15 só na tela, pra caber na coluna de pré-visualização.
 const PREVIEW_SCALE_10X15 = 0.65;
@@ -16,6 +16,7 @@ interface LabelPreviewProps {
   documentEnabled: boolean;
   signatureEnabled: boolean;
   labelSize: LabelSize;
+  labelStyle: LabelStyle;
   dateEnabled: boolean;
   marginTopMm: number;
   marginBottomMm: number;
@@ -28,6 +29,7 @@ export function LabelPreview({
   documentEnabled,
   signatureEnabled,
   labelSize,
+  labelStyle,
   dateEnabled,
   marginTopMm,
   marginBottomMm,
@@ -36,7 +38,9 @@ export function LabelPreview({
 }: LabelPreviewProps) {
   const is10x15 = labelSize === '10x15';
   const fixedMargin = LABEL_10X15_MARGIN_MM;
-  const text = LABEL_TEXT[labelSize];
+  const { factor, font } = labelTextStyles(labelStyle, is10x15);
+  const boxSize = `${labelStyle.sizes.payment * factor * 0.4}mm`;
+  const amountWidth = `${labelStyle.sizes.payment * factor * 2}mm`;
 
   return (
     <div className="flex flex-col items-center gap-2 rounded-lg border bg-muted/40 p-4">
@@ -54,46 +58,56 @@ export function LabelPreview({
         }}
       >
         <div className="flex items-start justify-between gap-[2mm]">
-          <p className={cn('m-0 tracking-wide uppercase', text.title)}>PEDIDO 1234</p>
+          <p className="m-0 tracking-wide uppercase" style={font('title')}>
+            PEDIDO 1234
+          </p>
         </div>
 
-        <p className={cn('m-0 leading-tight', text.name)}>Cliente Exemplo</p>
+        <p className="m-0 leading-tight" style={font('name')}>
+          Cliente Exemplo
+        </p>
 
         {paymentOptionsEnabled && (
           <>
-            <div className={cn('flex items-center gap-[2mm]', text.body)}>
-              <span className={cn('shrink-0 rounded-sm border-[1.5pt] border-[#18181b]', text.checkbox)} />
+            <div className="flex items-center gap-[2mm]" style={font('payment')}>
+              <span
+                className="shrink-0 rounded-sm border-[1.5pt] border-[#18181b]"
+                style={{ width: boxSize, height: boxSize }}
+              />
               <span>Pago</span>
             </div>
-            <div className={cn('flex items-center gap-[2mm]', text.body)}>
-              <span className={cn('shrink-0 rounded-sm border-[1.5pt] border-[#18181b]', text.checkbox)} />
+            <div className="flex items-center gap-[2mm]" style={font('payment')}>
+              <span
+                className="shrink-0 rounded-sm border-[1.5pt] border-[#18181b]"
+                style={{ width: boxSize, height: boxSize }}
+              />
               <span>A Pagar R$</span>
-              <span className={cn('border-b border-[#18181b]', text.amountWidth, text.bodyStrong)}>&nbsp;</span>
+              <span className="border-b border-[#18181b]" style={{ width: amountWidth }}>
+                &nbsp;
+              </span>
             </div>
           </>
         )}
 
-        <p className={cn('m-0', text.bodyStrong)}>+55 21 99999-9999</p>
-        <p className={cn('m-0 leading-snug text-[#52525b]', text.body)}>
+        <p className="m-0" style={font('phone')}>
+          +55 21 99999-9999
+        </p>
+        <p className="m-0 leading-snug text-[#52525b]" style={font('address')}>
           Rua Exemplo, 123 - Bairro, Cidade - UF, 00000-000
         </p>
 
         {dateEnabled && (
-          <p suppressHydrationWarning className={cn('m-0', text.bodyStrong)}>Data: {new Date().toLocaleDateString('pt-BR')}</p>
+          <p suppressHydrationWarning className="m-0" style={font('date')}>
+            Data: {new Date().toLocaleDateString('pt-BR')}
+          </p>
         )}
 
         {documentEnabled && (
-          <div className={cn('mt-[2mm] flex items-end gap-[2mm]', text.body)}>
-            <span className="shrink-0">Documento:</span>
-            <span className="h-[7mm] flex-1 border-b-[0.5mm] border-[#18181b]" />
-          </div>
+          <FieldLine label="Documento:" style={font('fields')} lineClassName="border-[#18181b]" />
         )}
 
         {signatureEnabled && (
-          <div className={cn('mt-[3mm] flex items-end gap-[2mm]', text.body)}>
-            <span className="shrink-0">Assinatura:</span>
-            <span className="h-[8mm] flex-1 border-b-[0.5mm] border-dashed border-[#18181b]" />
-          </div>
+          <FieldLine label="Assinatura:" style={font('fields')} lineClassName="border-[#18181b]" />
         )}
       </div>
     </div>
