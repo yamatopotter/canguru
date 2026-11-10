@@ -7,8 +7,8 @@ export const LABEL_SIZE_OPTIONS: Record<LabelSize, string> = {
   '10x15': '10x15 cm',
 };
 
-// Etiqueta 10x15 sempre tem 1cm de margem nos quatro lados (não configurável).
-export const LABEL_10X15_MARGIN_MM = 10;
+// Etiqueta 10x15 sempre tem 0,5cm de margem nos quatro lados (não configurável).
+export const LABEL_10X15_MARGIN_MM = 5;
 
 export type Role = 'ADMIN' | 'OPERATOR';
 
