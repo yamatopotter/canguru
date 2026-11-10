@@ -10,6 +10,10 @@ export const LABEL_SIZE_OPTIONS: Record<LabelSize, string> = {
 // Etiqueta 10x15 sempre tem 0,5cm de margem nos quatro lados (não configurável).
 export const LABEL_10X15_MARGIN_MM = 5;
 
+// A impressora (Argox) imprime ~5mm acima do início da etiqueta; este
+// deslocamento empurra o conteúdo pra baixo só na impressão pra compensar.
+export const LABEL_10X15_PRINT_OFFSET_TOP_MM = 5;
+
 export type Role = 'ADMIN' | 'OPERATOR';
 
 export const ROLE_LABELS: Record<Role, string> = {

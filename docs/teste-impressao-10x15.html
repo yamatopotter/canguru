@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<title>Teste de impressão 100x150mm</title>
+<style>
+  /* Página de teste: 100x150mm exatos, sem margem, sem zoom. Imprime uma moldura
+     nas bordas e uma régua em mm pra mostrar onde a impressora começa/termina. */
+  @page { size: 100mm 150mm; margin: 0; }
+  html, body { margin: 0; padding: 0; background: #fff; color: #000; font: 8pt sans-serif; }
+  .page { position: relative; width: 100mm; height: 148mm; overflow: hidden; break-after: page; }
+  .page:last-child { break-after: auto; }
+  .frame { position: absolute; inset: 0; border: 0.4mm solid #000; box-sizing: border-box; }
+  .tick { position: absolute; left: 0; height: 0; border-top: 0.2mm solid #000; }
+  .tick.major { width: 10mm; }
+  .tick.minor { width: 4mm; }
+  .tick span { position: absolute; left: 11mm; top: -1.6mm; font-size: 7pt; }
+  .tick.right { left: auto; right: 0; }
+  .label { position: absolute; left: 20mm; right: 6mm; text-align: center; font-weight: bold; }
+  .top { top: 3mm; }
+  .bottom { bottom: 3mm; }
+  .middle { top: 70mm; font-size: 11pt; }
+  .cross { position: absolute; width: 6mm; height: 6mm; }
+  .cross::before, .cross::after { content: ""; position: absolute; background: #000; }
+  .cross::before { left: 2.9mm; top: 0; width: 0.2mm; height: 6mm; }
+  .cross::after { top: 2.9mm; left: 0; height: 0.2mm; width: 6mm; }
+  .c1 { top: 8mm; left: 70mm; } .c2 { top: 8mm; right: 3mm; }
+  .c3 { bottom: 8mm; left: 70mm; } .c4 { bottom: 8mm; right: 3mm; }
+</style>
+</head>
+<body>
+<div class="page">
+  <div class="frame"></div>
+  <script>
+    // régua: marca a cada 5mm (maior a cada 10mm, com o número), nos dois lados
+    const page = document.currentScript.parentElement;
+    for (let mm = 5; mm < 148; mm += 5) {
+      const major = mm % 10 === 0;
+      const left = document.createElement('div');
+      left.className = 'tick ' + (major ? 'major' : 'minor');
+      left.style.top = mm + 'mm';
+      if (major) left.innerHTML = '<span>' + mm + '</span>';
+      page.appendChild(left);
+      const right = document.createElement('div');
+      right.className = 'tick right ' + (major ? 'major' : 'minor');
+      right.style.top = mm + 'mm';
+      page.appendChild(right);
+    }
+  </script>
+  <div class="label top">▲ TOPO (0mm)</div>
+  <div class="label middle">75mm</div>
+  <div class="label bottom">FIM (148mm) ▼</div>
+  <div class="cross c1"></div><div class="cross c2"></div>
+  <div class="cross c3"></div><div class="cross c4"></div>
+</div>
+</body>
+</html>

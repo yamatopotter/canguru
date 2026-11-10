@@ -134,21 +134,22 @@ body {
   }
 }
 
-/* Etiqueta 10x15: 100mm de largura (66.67mm × zoom 1.25 do LabelCard). Em tela
-   o cartão fica com o mesmo tamanho; na impressão a altura é fixada em 136mm
-   (folga de 4mm em relação à página de 140mm: impressoras térmicas têm área
-   imprimível menor que o papel e qualquer excesso quebraria o conteúdo em
-   duas páginas/etiquetas). min-height precisa ser zerado aqui porque esta
-   regra (fora de @layer) vence o print:min-h-0 do Tailwind. */
+/* Etiqueta 10x15: 100mm de largura (66.67mm × zoom 1.5 do LabelCard). Em tela
+   o cartão fica com o mesmo tamanho. Na impressão a página tem 148mm (menor que
+   a etiqueta de 150mm, pra impressora não "pular" de etiqueta) e o cartão fica
+   com 140mm de altura: 5mm de deslocamento do topo + 3mm de segurança. Impressoras
+   térmicas têm área imprimível menor que o papel e qualquer excesso quebraria o
+   conteúdo em duas etiquetas. min-height precisa ser zerado aqui porque esta regra
+   (fora de @layer) vence o print:min-h-0 do Tailwind. */
 .label-card-10x15 {
-  width: calc(100mm / 1.25);
-  min-height: calc(140mm / 1.25);
+  width: calc(100mm / 1.5);
+  min-height: calc(148mm / 1.5);
 }
 
 @media print {
   .label-card-10x15 {
     min-height: 0;
-    height: calc(136mm / 1.25);
+    height: calc(140mm / 1.5);
     overflow: hidden;
     break-inside: avoid;
   }

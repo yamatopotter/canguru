@@ -120,7 +120,7 @@ export function LabelSelectionGrid({
 
       {labelSize === '10x15' && (
         // Sobrescreve o @page da térmica (globals.css) só enquanto esta tela está aberta.
-        <style>{'@media print { @page { size: 100mm 140mm; margin: 0; } }'}</style>
+        <style>{'@media print { @page { size: 100mm 148mm; margin: 0; } }'}</style>
       )}
 
       <div className="flex flex-wrap justify-center gap-4 print:block">

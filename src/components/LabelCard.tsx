@@ -1,6 +1,6 @@
 'use client';
 
-import { LABEL_10X15_MARGIN_MM, type LabelSize, type ServiceWithCustomer } from '../types';
+import { LABEL_10X15_MARGIN_MM, LABEL_10X15_PRINT_OFFSET_TOP_MM, type LabelSize, type ServiceWithCustomer } from '../types';
 import { Checkbox } from './ui/checkbox';
 import { cn } from '@/lib/utils';
 
@@ -32,7 +32,7 @@ const DEFAULT_PRODUCT_TITLE = 'Entrega de Produtos';
 // A etiqueta 10x15 reaproveita o layout da térmica (tamanhos em pt/mm) e é
 // ampliada com "zoom": largura/margens são divididas pelo mesmo fator pra
 // que, depois de ampliadas, ocupem exatamente 100mm de largura e 1cm de margem.
-export const LABEL_10X15_ZOOM = 1.25;
+export const LABEL_10X15_ZOOM = 1.5;
 
 // Input nativo em vez de um botão fingindo ser radio: a marcação (o
 // "pontinho" do radio) é desenhada pelo próprio motor de renderização do
@@ -105,7 +105,9 @@ export function LabelCard({
   const address = [service.address, service.address_complement].filter(Boolean).join(' ');
   const is10x15 = labelSize === '10x15';
   // Em 10x15 a margem é fixa de 1cm nos quatro lados, ignorando as configuráveis.
-  const marginTop = is10x15 ? LABEL_10X15_MARGIN_MM / LABEL_10X15_ZOOM : marginTopMm;
+  const marginTop = is10x15
+    ? (LABEL_10X15_MARGIN_MM + LABEL_10X15_PRINT_OFFSET_TOP_MM) / LABEL_10X15_ZOOM
+    : marginTopMm;
   const marginBottom = is10x15 ? LABEL_10X15_MARGIN_MM / LABEL_10X15_ZOOM : marginBottomMm;
   const marginLeft = is10x15 ? LABEL_10X15_MARGIN_MM / LABEL_10X15_ZOOM : marginLeftMm;
   const marginRight = is10x15 ? LABEL_10X15_MARGIN_MM / LABEL_10X15_ZOOM : marginRightMm;
