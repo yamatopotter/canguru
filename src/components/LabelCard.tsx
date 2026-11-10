@@ -32,7 +32,7 @@ const DEFAULT_PRODUCT_TITLE = 'Entrega de Produtos';
 // A etiqueta 10x15 reaproveita o layout da térmica (tamanhos em pt/mm) e é
 // ampliada com "zoom": largura/margens são divididas pelo mesmo fator pra
 // que, depois de ampliadas, ocupem exatamente 100mm de largura e 1cm de margem.
-export const LABEL_10X15_ZOOM = 1.5;
+export const LABEL_10X15_ZOOM = 1.25;
 
 // Input nativo em vez de um botão fingindo ser radio: a marcação (o
 // "pontinho" do radio) é desenhada pelo próprio motor de renderização do

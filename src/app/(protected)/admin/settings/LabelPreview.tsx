@@ -8,7 +8,7 @@ import { LABEL_10X15_MARGIN_MM, type LabelSize } from '@/types';
 
 // Mesmo fator de ampliação do LabelCard (ver LABEL_10X15_ZOOM), reduzido pra
 // a etiqueta 10x15 caber na coluna de pré-visualização.
-const ZOOM_10X15 = 1.5;
+const ZOOM_10X15 = 1.25;
 const PREVIEW_SCALE_10X15 = 0.65;
 
 interface LabelPreviewProps {
@@ -42,7 +42,7 @@ export function LabelPreview({
         className="flex flex-col gap-[2mm] bg-white text-[#18181b] shadow-md"
         style={{
           width: is10x15 ? `${100 / ZOOM_10X15}mm` : '70mm',
-          minHeight: is10x15 ? `${150 / ZOOM_10X15}mm` : undefined,
+          minHeight: is10x15 ? `${140 / ZOOM_10X15}mm` : undefined,
           paddingTop: `${is10x15 ? fixedMargin : marginTopMm}mm`,
           paddingBottom: `${is10x15 ? fixedMargin : marginBottomMm}mm`,
           paddingLeft: `${is10x15 ? fixedMargin : marginLeftMm}mm`,
