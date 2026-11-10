@@ -14,6 +14,7 @@ interface LabelSelectionGridProps {
   routeName: string;
   logoUrl: string | null;
   paymentOptionsEnabled: boolean;
+  documentEnabled: boolean;
   signatureEnabled: boolean;
   labelSize: LabelSize;
   dateEnabled: boolean;
@@ -45,6 +46,7 @@ export function LabelSelectionGrid({
   routeName,
   logoUrl,
   paymentOptionsEnabled,
+  documentEnabled,
   signatureEnabled,
   labelSize,
   dateEnabled,
@@ -135,6 +137,7 @@ export function LabelSelectionGrid({
               isLastSelected={service.id === lastSelectedId}
               logoUrl={logoUrl}
               paymentOptionsEnabled={paymentOptionsEnabled}
+              documentEnabled={documentEnabled}
               signatureEnabled={signatureEnabled}
               labelSize={labelSize}
               dateLabel={dateEnabled && today ? today : null}

@@ -24,6 +24,7 @@ export default async function RouteSelectorPage({ searchParams }: RouteSelectorP
     routesResult,
     branding,
     paymentOptionsSetting,
+    documentSetting,
     signatureSetting,
     labelSizeSetting,
     dateSetting,
@@ -35,6 +36,7 @@ export default async function RouteSelectorPage({ searchParams }: RouteSelectorP
     fetchRecentRoutes(1),
     getPublicSettings(),
     getSetting(SETTING_KEYS.paymentOptionsEnabled),
+    getSetting(SETTING_KEYS.documentEnabled),
     getSetting(SETTING_KEYS.signatureEnabled),
     getSetting(SETTING_KEYS.labelSize),
     getSetting(SETTING_KEYS.dateEnabled),
@@ -54,6 +56,7 @@ export default async function RouteSelectorPage({ searchParams }: RouteSelectorP
   const logoUrl = branding.status === 'fulfilled' ? branding.value.logoUrl : null;
   const paymentOptionsEnabled =
     paymentOptionsSetting.status === 'fulfilled' ? paymentOptionsSetting.value !== 'false' : true;
+  const documentEnabled = documentSetting.status === 'fulfilled' && documentSetting.value === 'true';
   const signatureEnabled = signatureSetting.status === 'fulfilled' && signatureSetting.value === 'true';
   const labelSize = labelSizeSetting.status === 'fulfilled' ? parseLabelSize(labelSizeSetting.value) : '72mm';
   const dateEnabled = dateSetting.status === 'fulfilled' && dateSetting.value === 'true';
@@ -122,6 +125,7 @@ export default async function RouteSelectorPage({ searchParams }: RouteSelectorP
           routeName={activeRoute?.name ?? activeRouteId}
           logoUrl={logoUrl}
           paymentOptionsEnabled={paymentOptionsEnabled}
+          documentEnabled={documentEnabled}
           signatureEnabled={signatureEnabled}
           labelSize={labelSize}
           dateEnabled={dateEnabled}

@@ -13,6 +13,7 @@ const PREVIEW_SCALE_10X15 = 0.65;
 
 interface LabelPreviewProps {
   paymentOptionsEnabled: boolean;
+  documentEnabled: boolean;
   signatureEnabled: boolean;
   labelSize: LabelSize;
   dateEnabled: boolean;
@@ -24,6 +25,7 @@ interface LabelPreviewProps {
 
 export function LabelPreview({
   paymentOptionsEnabled,
+  documentEnabled,
   signatureEnabled,
   labelSize,
   dateEnabled,
@@ -78,6 +80,13 @@ export function LabelPreview({
 
         {dateEnabled && (
           <p suppressHydrationWarning className={cn('m-0', text.bodyStrong)}>Data: {new Date().toLocaleDateString('pt-BR')}</p>
+        )}
+
+        {documentEnabled && (
+          <div className={cn('mt-[2mm] flex items-end gap-[2mm]', text.body)}>
+            <span className="shrink-0">Documento:</span>
+            <span className="h-[7mm] flex-1 border-b-[0.5mm] border-[#18181b]" />
+          </div>
         )}
 
         {signatureEnabled && (

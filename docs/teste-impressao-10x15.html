@@ -51,6 +51,8 @@
   /* contínua: a tracejada saiu fraca; preto sólido imprime bem */
   .demo .sign .line { flex: 1; height: 8mm; border-bottom: 0.6mm solid #18181b; }
   .demo .note { position: absolute; left: 5mm; right: 5mm; bottom: 1.5mm; font: 6pt sans-serif; color: #555; }
+  .demo .sign.doc { margin-top: 2mm; }
+  .demo .sign.doc .line { height: 7mm; }
 </style>
 </head>
 <body>
@@ -86,6 +88,7 @@
   <p class="strong">+55 21 99999-9999</p>
   <p class="addr">Rua Exemplo, 123 - Bairro, Cidade - UF, 00000-000</p>
   <p class="strong">Data: 10/11/2026</p>
+  <div class="sign doc"><span>Documento:</span><span class="line"></span></div>
   <div class="sign"><span>Assinatura:</span><span class="line"></span></div>
   <p class="note">Demo 1: etiqueta típica</p>
 </div>
@@ -97,6 +100,7 @@
   <p class="strong">+55 21 99999-9999</p>
   <p class="addr">Rua Felipe de Oliveira, 70 - Apt 402 - Copacabana, Rio de Janeiro - RJ, Brasil, 22020-000 - Ref.: portaria 24h</p>
   <p class="strong">Data: 10/11/2026</p>
+  <div class="sign doc"><span>Documento:</span><span class="line"></span></div>
   <div class="sign"><span>Assinatura:</span><span class="line"></span></div>
   <p class="note">Demo 2: pior caso (nome e endereço longos)</p>
 </div>

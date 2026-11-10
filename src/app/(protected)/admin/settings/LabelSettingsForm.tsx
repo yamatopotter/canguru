@@ -15,6 +15,7 @@ const initialState: SettingsFormState = {};
 
 interface LabelSettingsFormProps {
   paymentOptionsEnabled: boolean;
+  documentEnabled: boolean;
   signatureEnabled: boolean;
   labelSize: LabelSize;
   dateEnabled: boolean;
@@ -26,6 +27,7 @@ interface LabelSettingsFormProps {
 
 export function LabelSettingsForm({
   paymentOptionsEnabled,
+  documentEnabled,
   signatureEnabled,
   labelSize: initialLabelSize,
   dateEnabled,
@@ -40,6 +42,7 @@ export function LabelSettingsForm({
   // Estado local (não o valor salvo) alimenta a pré-visualização em tempo
   // real, antes mesmo de salvar.
   const [paymentOptions, setPaymentOptions] = useState(paymentOptionsEnabled);
+  const [documentField, setDocumentField] = useState(documentEnabled);
   const [signature, setSignature] = useState(signatureEnabled);
   const [labelSize, setLabelSize] = useState<LabelSize>(initialLabelSize);
   const [showDate, setShowDate] = useState(dateEnabled);
@@ -89,6 +92,20 @@ export function LabelSettingsForm({
           </Label>
           <span className="-mt-2.5 text-xs text-muted-foreground">
             A data de hoje é preenchida automaticamente na etiqueta e não pode ser editada.
+          </span>
+
+          <Label className="flex items-center gap-2 font-normal">
+            <Checkbox
+              name="documentEnabled"
+              value="on"
+              checked={documentField}
+              onCheckedChange={(checked) => setDocumentField(checked === true)}
+            />
+            Mostrar campo de documento de quem recebe
+          </Label>
+          <span className="-mt-2.5 text-xs text-muted-foreground">
+            Adiciona uma linha &quot;Documento&quot; (RG/CPF) acima da assinatura, pra quem recebe
+            preencher à mão.
           </span>
 
           <Label className="flex items-center gap-2 font-normal">
@@ -209,6 +226,7 @@ export function LabelSettingsForm({
 
         <LabelPreview
           paymentOptionsEnabled={paymentOptions}
+          documentEnabled={documentField}
           signatureEnabled={signature}
           labelSize={labelSize}
           dateEnabled={showDate}

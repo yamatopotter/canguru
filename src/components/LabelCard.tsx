@@ -13,6 +13,7 @@ interface LabelCardProps {
   isLastSelected: boolean;
   logoUrl?: string | null;
   paymentOptionsEnabled: boolean;
+  documentEnabled: boolean;
   signatureEnabled: boolean;
   labelSize: LabelSize;
   // Data de impressão já formatada (preenchida automaticamente); null = não exibir.
@@ -111,6 +112,7 @@ export function LabelCard({
   isLastSelected,
   logoUrl,
   paymentOptionsEnabled,
+  documentEnabled,
   signatureEnabled,
   labelSize,
   dateLabel,
@@ -233,6 +235,13 @@ export function LabelCard({
       <p className={cn('m-0 leading-snug text-muted-foreground print:text-foreground', text.body)}>{address}</p>
 
       {dateLabel && <p className={cn('m-0', text.bodyStrong)}>Data: {dateLabel}</p>}
+
+      {documentEnabled && (
+        <div className={cn('mt-[2mm] flex items-end gap-[2mm]', text.body)}>
+          <span className="shrink-0">Documento:</span>
+          <span className="h-[7mm] flex-1 border-b-[0.5mm] border-foreground" />
+        </div>
+      )}
 
       {signatureEnabled && (
         <div className={cn('mt-[3mm] flex items-end gap-[2mm]', text.body)}>

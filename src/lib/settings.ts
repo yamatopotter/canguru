@@ -19,6 +19,7 @@ export const SETTING_KEYS = {
   paymentOptionsEnabled: 'payment_options_enabled',
   labelSize: 'label_size',
   dateEnabled: 'date_enabled',
+  documentEnabled: 'document_enabled',
   signatureEnabled: 'signature_enabled',
   labelMarginTop: 'label_margin_top',
   labelMarginBottom: 'label_margin_bottom',
