@@ -211,7 +211,7 @@ export function LabelCard({
       {signatureEnabled && (
         <div className="mt-[3mm] flex items-end gap-[2mm] text-[11pt]">
           <span className="shrink-0">Assinatura:</span>
-          <span className="h-[8mm] flex-1 border-b border-foreground" />
+          <span className="h-[8mm] flex-1 border-b-[0.5mm] border-foreground" />
         </div>
       )}
     </div>

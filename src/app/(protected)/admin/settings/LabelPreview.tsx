@@ -82,7 +82,7 @@ export function LabelPreview({
         {signatureEnabled && (
           <div className="mt-[3mm] flex items-end gap-[2mm] text-[11pt]">
             <span className="shrink-0">Assinatura:</span>
-            <span className="h-[8mm] flex-1 border-b border-[#18181b]" />
+            <span className="h-[8mm] flex-1 border-b-[0.5mm] border-[#18181b]" />
           </div>
         )}
       </div>
