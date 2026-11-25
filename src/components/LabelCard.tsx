@@ -21,6 +21,7 @@ interface LabelCardProps {
   isLastSelected: boolean;
   logoUrl?: string | null;
   paymentOptionsEnabled: boolean;
+  recipientEnabled: boolean;
   documentEnabled: boolean;
   signatureEnabled: boolean;
   labelSize: LabelSize;
@@ -39,8 +40,8 @@ interface LabelCardProps {
 
 const DEFAULT_PRODUCT_TITLE = 'Entrega de Produtos';
 
-// Linha pra preencher à mão (Documento / Assinatura): mesmo componente e mesma
-// aparência pros dois. Linha contínua — a tracejada saiu fraca na Argox, que roda
+// Linha pra preencher à mão (Recebedor / Documento / Assinatura): mesmo componente e mesma
+// aparência pra todos. Linha contínua — a tracejada saiu fraca na Argox, que roda
 // com fonte fraca (0,8A em vez de 2,4A); traço fino falha, preto sólido imprime bem.
 export function FieldLine({
   label,
@@ -119,6 +120,7 @@ export function LabelCard({
   isLastSelected,
   logoUrl,
   paymentOptionsEnabled,
+  recipientEnabled,
   documentEnabled,
   signatureEnabled,
   labelSize,
@@ -255,6 +257,8 @@ export function LabelCard({
           Data: {dateLabel}
         </p>
       )}
+
+      {recipientEnabled && <FieldLine label="Recebedor:" style={font('fields')} />}
 
       {documentEnabled && <FieldLine label="Documento:" style={font('fields')} />}
 

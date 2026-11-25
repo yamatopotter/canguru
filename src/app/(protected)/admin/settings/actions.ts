@@ -63,6 +63,7 @@ export async function updateLabelSettingsAction(
   const admin = await requireAdmin();
 
   const paymentOptionsEnabled = formData.get('paymentOptionsEnabled') === 'on';
+  const recipientEnabled = formData.get('recipientEnabled') === 'on';
   const documentEnabled = formData.get('documentEnabled') === 'on';
   const signatureEnabled = formData.get('signatureEnabled') === 'on';
   const dateEnabled = formData.get('dateEnabled') === 'on';
@@ -106,6 +107,7 @@ export async function updateLabelSettingsAction(
     setSetting(SETTING_KEYS.paymentOptionsEnabled, String(paymentOptionsEnabled)),
     setSetting(SETTING_KEYS.labelSize, labelSize),
     setSetting(SETTING_KEYS.dateEnabled, String(dateEnabled)),
+    setSetting(SETTING_KEYS.recipientEnabled, String(recipientEnabled)),
     setSetting(SETTING_KEYS.documentEnabled, String(documentEnabled)),
     setSetting(SETTING_KEYS.signatureEnabled, String(signatureEnabled)),
     setSetting(SETTING_KEYS.labelMarginTop, String(marginTop)),
@@ -118,7 +120,7 @@ export async function updateLabelSettingsAction(
     actorId: admin.id,
     actorName: admin.name,
     action: ACTIVITY_ACTIONS.settingsUpdate,
-    metadata: { paymentOptionsEnabled, labelSize, dateEnabled, documentEnabled, signatureEnabled, fontWeight, scale, fontSizes: Object.fromEntries(fontSizes.map(({ key, value }) => [key, value])), marginTop, marginBottom, marginLeft, marginRight },
+    metadata: { paymentOptionsEnabled, labelSize, dateEnabled, recipientEnabled, documentEnabled, signatureEnabled, fontWeight, scale, fontSizes: Object.fromEntries(fontSizes.map(({ key, value }) => [key, value])), marginTop, marginBottom, marginLeft, marginRight },
   });
 
   revalidatePath('/', 'layout');

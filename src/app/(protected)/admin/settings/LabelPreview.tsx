@@ -13,6 +13,7 @@ const PREVIEW_SCALE_10X15 = 0.65;
 
 interface LabelPreviewProps {
   paymentOptionsEnabled: boolean;
+  recipientEnabled: boolean;
   documentEnabled: boolean;
   signatureEnabled: boolean;
   labelSize: LabelSize;
@@ -26,6 +27,7 @@ interface LabelPreviewProps {
 
 export function LabelPreview({
   paymentOptionsEnabled,
+  recipientEnabled,
   documentEnabled,
   signatureEnabled,
   labelSize,
@@ -100,6 +102,10 @@ export function LabelPreview({
           <p suppressHydrationWarning className="m-0" style={font('date')}>
             Data: {new Date().toLocaleDateString('pt-BR')}
           </p>
+        )}
+
+        {recipientEnabled && (
+          <FieldLine label="Recebedor:" style={font('fields')} lineClassName="border-[#18181b]" />
         )}
 
         {documentEnabled && (

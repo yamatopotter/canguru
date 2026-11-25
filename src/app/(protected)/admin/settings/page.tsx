@@ -24,6 +24,7 @@ export default async function AdminSettingsPage() {
     zohoRedirectUri,
     zohoAccountsBaseUrl,
     paymentOptionsEnabled,
+    recipientEnabled,
     documentEnabled,
     signatureEnabled,
     labelSize,
@@ -48,6 +49,7 @@ export default async function AdminSettingsPage() {
     getSetting(SETTING_KEYS.zohoRedirectUri),
     getSetting(SETTING_KEYS.zohoAccountsBaseUrl),
     getSetting(SETTING_KEYS.paymentOptionsEnabled),
+    getSetting(SETTING_KEYS.recipientEnabled),
     getSetting(SETTING_KEYS.documentEnabled),
     getSetting(SETTING_KEYS.signatureEnabled),
     getSetting(SETTING_KEYS.labelSize),
@@ -91,6 +93,7 @@ export default async function AdminSettingsPage() {
         <TabsContent value="etiqueta">
           <LabelSettingsForm
             paymentOptionsEnabled={paymentOptionsEnabled !== 'false'}
+            recipientEnabled={recipientEnabled === 'true'}
             documentEnabled={documentEnabled === 'true'}
             signatureEnabled={signatureEnabled === 'true'}
             labelSize={parseLabelSize(labelSize)}

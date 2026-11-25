@@ -27,6 +27,7 @@ const initialState: SettingsFormState = {};
 
 interface LabelSettingsFormProps {
   paymentOptionsEnabled: boolean;
+  recipientEnabled: boolean;
   documentEnabled: boolean;
   signatureEnabled: boolean;
   labelSize: LabelSize;
@@ -40,6 +41,7 @@ interface LabelSettingsFormProps {
 
 export function LabelSettingsForm({
   paymentOptionsEnabled,
+  recipientEnabled,
   documentEnabled,
   signatureEnabled,
   labelSize: initialLabelSize,
@@ -56,6 +58,7 @@ export function LabelSettingsForm({
   // Estado local (não o valor salvo) alimenta a pré-visualização em tempo
   // real, antes mesmo de salvar.
   const [paymentOptions, setPaymentOptions] = useState(paymentOptionsEnabled);
+  const [recipientField, setRecipientField] = useState(recipientEnabled);
   const [documentField, setDocumentField] = useState(documentEnabled);
   const [signature, setSignature] = useState(signatureEnabled);
   const [labelSize, setLabelSize] = useState<LabelSize>(initialLabelSize);
@@ -128,6 +131,20 @@ export function LabelSettingsForm({
           </Label>
           <span className="-mt-2.5 text-xs text-muted-foreground">
             A data de hoje é preenchida automaticamente na etiqueta e não pode ser editada.
+          </span>
+
+          <Label className="flex items-center gap-2 font-normal">
+            <Checkbox
+              name="recipientEnabled"
+              value="on"
+              checked={recipientField}
+              onCheckedChange={(checked) => setRecipientField(checked === true)}
+            />
+            Mostrar campo de recebedor
+          </Label>
+          <span className="-mt-2.5 text-xs text-muted-foreground">
+            Adiciona uma linha &quot;Recebedor&quot; pra anotar à mão o nome de quem está recebendo a
+            mercadoria.
           </span>
 
           <Label className="flex items-center gap-2 font-normal">
@@ -322,6 +339,7 @@ export function LabelSettingsForm({
 
         <LabelPreview
           paymentOptionsEnabled={paymentOptions}
+          recipientEnabled={recipientField}
           documentEnabled={documentField}
           signatureEnabled={signature}
           labelSize={labelSize}

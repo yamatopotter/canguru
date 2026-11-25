@@ -40,6 +40,7 @@ async function main() {
   await ensureSetting('label_font_payment', '11');
   await ensureSetting('label_font_fields', '11');
   await ensureSetting('date_enabled', 'false');
+  await ensureSetting('recipient_enabled', 'false');
   await ensureSetting('document_enabled', 'false');
   await ensureSetting('signature_enabled', 'false');
   await ensureSetting('label_margin_top', '2');

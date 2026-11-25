@@ -48,7 +48,7 @@ export const LABEL_FONT_SECTIONS: { key: keyof LabelFontSizes; label: string }[]
   { key: 'address', label: 'Endereço' },
   { key: 'date', label: 'Data' },
   { key: 'payment', label: 'Pago / A Pagar' },
-  { key: 'fields', label: 'Documento / Assinatura' },
+  { key: 'fields', label: 'Recebedor / Documento / Assinatura' },
 ];
 
 export interface LabelStyle {

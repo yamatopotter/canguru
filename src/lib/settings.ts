@@ -30,6 +30,7 @@ export const SETTING_KEYS = {
   labelFontWeight: 'label_font_weight',
   labelScale: 'label_scale',
   dateEnabled: 'date_enabled',
+  recipientEnabled: 'recipient_enabled',
   documentEnabled: 'document_enabled',
   signatureEnabled: 'signature_enabled',
   labelMarginTop: 'label_margin_top',
